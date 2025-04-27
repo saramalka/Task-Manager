@@ -6,10 +6,8 @@ const teamScema=new mongoose.Schema({
         type:String,
         required:true
     },
-    description:{
-        type:String
-    },
-    members:{
+    
+    members:[{
         userId:{
             type:mongoose.Schema.Types.ObjectId,
             ref:User
@@ -19,7 +17,7 @@ const teamScema=new mongoose.Schema({
             enum:['admin','member'],
             default:'member'
         }
-    } ,
+    } ],
     createdBy:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User',

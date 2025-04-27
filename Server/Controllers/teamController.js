@@ -28,10 +28,10 @@ const getTeamById=async(req,res)=>{
 
 const createTeam = async (req,res)=>{
     try{
-    const {name,createdBy,members,description} = req.body
+    const {name,createdBy,members} = req.body
     if(!name|!createdBy|!members)
         res.status(404).json("name , members and createdBy are required")
-    const team = await Team.create({name,createdBy,members,description});
+    const team = await Team.create({name,createdBy,members});
     res.json(team)
 }
     catch (err) {
@@ -50,7 +50,7 @@ const editTeam=async(req,res)=>{
         team.name=name??team.name
         team.createdBy=createdBy??team.createdBy
         team.members=members??team.members
-        team.description=description??team.description
+        
     await team.save();
     res.json({ message: 'Team updated successfully', team });
 }catch (err) {

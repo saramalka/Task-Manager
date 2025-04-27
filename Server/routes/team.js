@@ -9,7 +9,7 @@ router.use(express.json())
 router.get("/",teamController.getAllUserTeams)
 router.get("/:id",teamController.getTeamById)
 router.post('/', verifyToken, isAdmin, teamController.createTeam);
-router.put("/",verifyToken,isAdmin,teamController.editTeam)
+router.put("/",isAdmin,teamController.editTeam)
 router.delete("/:id",verifyToken,isAdmin,teamController.deleteTeam)
 router.post("/:id/members",verifyToken,isAdmin,teamController.addMemberToTeam)
 router.delete("/:id/members/:userId",verifyToken,isAdmin,teamController.removeMemberFromTeam)

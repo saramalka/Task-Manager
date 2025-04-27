@@ -33,8 +33,7 @@ const getAllUsers= async (req, res) => {
 }
 
 const apdateUser=async(req,res)=>{
-    const{name,password,email,teams,role}=req.body
-    debugger
+    const{name,_id,password,email,teams,role}=req.body
     if(!name||!password||!_id|!email)
         res.status(400).json('name, id and username are required fields')
     
