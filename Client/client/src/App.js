@@ -8,17 +8,16 @@ import AppRoutes from "./routes";
 import SignUpForm from './Components/register';
 import Menu from './Components/menuBar';
 import { BrowserRouter } from "react-router-dom";
+
 function App() {
   return (
     <>
 
-    <BrowserRouter>
+    <BrowserRouter >
     <Menu/>
     <AppRoutes />
     
     </BrowserRouter>
-    {/* 
-    <SignUpForm/> */}
     </>
   );
 }
