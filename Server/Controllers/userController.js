@@ -6,6 +6,10 @@ const register=async(req,res)=>{
     const {name,password,email}=req.body
         if(!name|!password|!email)
             res.status(404).json({error:true, message:"name,password and email are required"})
+    const duplicate = await User.findOne({name}).lean()
+    if(duplicate){
+        return res.status(409).json({message:"Duplicate username"})
+    }
     const passwordHash = await bcrypt.hash(password, 10);
         const user=await User.create({name,password:passwordHash,email})
 
@@ -74,23 +78,24 @@ const getUserByID = async (req, res) => {
         res.json(user)
         }
 
-        const login = async (req, res) => {
-            const { email, password } = req.body;
-            const user = await User.findOne({ email });
+const login = async (req, res) => {
+     const { name, password } = req.body;
+     if(!name || !password) {
+        return res.status(400).json({message:'All fields are required'})
+        }
+     const user = await User.findOne({ name }).lean();
           
-            if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
-              return res.status(401).json({ message: 'Invalid credentials' });
-            }
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
           
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-              expiresIn: '1d'
-            });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
           
-            res.json({ token });
-          };
+        res.json({ token });
+        };
           
-          const getMe = async (req, res) => {
-            const user = await User.findById(req.userId).select('-password');
-            res.json(user);
-          };
+    const getMe = async (req, res) => {
+        const user = await User.findById(req.userId).select('-password');
+        res.json(user);
+      };
 module.exports={getAllUsers,apdateUser,deleteUser,getUserByID,login,getMe,register}

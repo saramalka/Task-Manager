@@ -2,7 +2,9 @@ const Team=require("../Models/team.model")
 
 const getAllUserTeams=async(req,res)=>{
     try{
-    const teams=await Team.find().lean()
+    
+    const teams = await Team.find().populate('createdBy', 'name').populate('members.userId', 'name').lean()
+
     if (!teams || teams.length === 0) {
         return res.status(404).send('No teams found');
       }

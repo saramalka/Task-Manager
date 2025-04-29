@@ -4,10 +4,7 @@ const taskController=require("../Controllers/taskController")
 
 router.use(express.json())
 
-router.get("/",(req,res)=>{
-
-    res.send("Task")
-})
+router.get("/",taskController.getAllTasks)
 
 
 router.get("/:id",taskController.getTaskByTeam)

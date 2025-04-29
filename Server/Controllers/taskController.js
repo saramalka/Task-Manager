@@ -1,6 +1,6 @@
-const Team = require("../Models/team.model");
-const User = require("../Models/user.model");
+const mongoose=require("mongoose")
 const Task=require("../Models/task.model")
+
 
 const createTask=async(req,res)=>{
     const { title, teamId,status,priority,assignedTo,createdBy,comments } = req.body;
@@ -13,27 +13,38 @@ const createTask=async(req,res)=>{
         res.status(500).json({ message: 'Server error' });
     }
 }
-
+const getAllTasks=async(req,res)=>{
+    const task=await Task.find()
+    if(!task)
+        res.status(404).send('task not found')
+    res.send(task)
+}
 const getTaskByTeam=async(req,res)=>{
     try{
-    const {teamId}=req.params
-    const task=await Task.find({teamId})
+    const { id } = req.params;
+    const teamObjectId = new mongoose.Types.ObjectId(id);
+    const task=await Task.find({teamId:teamObjectId})
+
     if(!task)
         res.status(404).send('task not found')
     res.send(task)
     }catch(err){
+        console.log('Error in getTaskByTeam:', err);
         res.status(500).json({ message: 'Server error' });
     }
 }
 
 const getTaskById=async(req,res)=>{
+    
     try{
-    const {taskId}=req.params
-    const task=await Task.findById(taskId)
+        const { id } = req.params;
+        const taskObjectId = new mongoose.Types.ObjectId(id);
+    const task=await Task.findById({taskId:taskObjectId})
     if(!task)
         res.status(404).send('task not found')
     res.send(task)
     }catch(err){
+        console.log('Error in getTaskById:', err);
         res.status(500).json({ message: 'Server error' });
     }
 }
@@ -94,4 +105,4 @@ const updateTaskStatus=async(req,res)=>{
     
 }
 
-module.exports={createTask,getTaskByTeam,getTaskById,editTask,deleteTask,updateTaskStatus}
+module.exports={createTask,getTaskByTeam,getTaskById,editTask,deleteTask,updateTaskStatus,getAllTasks}
