@@ -15,12 +15,14 @@ import { MultiSelect } from 'primereact/multiselect';
 import { Slider } from 'primereact/slider';
 import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
+import { Toolbar } from 'primereact/toolbar';
 import {  useDeleteTeamMutation, useGetTeamsQuery } from '../slices/teamSlice';
 import { Dialog } from 'primereact/dialog';
+import { classNames } from 'primereact/utils';
 
 export default function TeamsList() {
-   // const [customers, setCustomers] = useState([]);
-   const {data:teams=[],isError,isLoading,isSuccess,error}=useGetTeamsQuery()
+   const [teams, setTeams] = useState([]);
+   const {data,isError,isLoading,isSuccess,error}=useGetTeamsQuery()
     const [selectedTeams, setSelectedTeams] = useState([]);
     const [deleteTeamDialog, setDeleteTeamDialog] = useState(false);
 const [deleteTeamsDialog, setDeleteTeamsDialog] = useState(false);
@@ -79,6 +81,13 @@ const[deleteTeamById]=useDeleteTeamMutation()
                 return null;
         }
     };
+    const teamDialogFooter = (
+        <React.Fragment>
+            <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
+            <Button label="Save" icon="pi pi-check" onClick={saveTeam} />
+        </React.Fragment>
+    );
+    
  const leftToolbarTemplate = () => {
         return (
             <div className="flex flex-wrap gap-2">
@@ -93,9 +102,9 @@ const[deleteTeamById]=useDeleteTeamMutation()
         setTeamDialog(true);
     };
     useEffect(() => {
+        setTeams(data)
         
-        //CustomerService.getCustomersLarge().then((data) => setCustomers(getCustomers(data)));
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [data]); 
 
     const getTeams = (data) => {
         
@@ -105,6 +114,8 @@ const[deleteTeamById]=useDeleteTeamMutation()
             return d;
         });
     };
+
+  
 
     const formatDate = (value) => {
         if (!value) return '';
@@ -160,7 +171,51 @@ const[deleteTeamById]=useDeleteTeamMutation()
         setFilters(_filters);
         setGlobalFilterValue(value);
     };
+    const hideDialog = () => {
+         setSubmitted(false);
+         setTeamDialog(false);
+     };
+const findIndexById = (id) => {
+    let index = -1;
+    for (let i = 0; i < teams.length; i++) {
+        if (teams[i].id === id) {
+            index = i;
+            break;
+        }
+    }
+    return index;
+};
+   const saveTeam = () => {
+   setSubmitted(true);
+   if (team.name.trim()) {
+       let _teams = [...teams];
+       let _team = { ...team };
 
+         if (team._id) {
+             const index = findIndexById(team._id);
+             _teams[index] = _team;
+             toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Team Updated', life: 3000 });
+         } else {
+            _team.id = createId();
+            _team.image = 'team-placeholder.svg';
+            _teams.push(_team);
+             toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Team Created', life: 3000 });
+         }
+         setTeams(_teams);
+         setTeamDialog(false);
+         setTeam(emptyTeam);
+     }
+ };
+ const createId = () => {
+       let id = '';
+       let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+   
+       for (let i = 0; i < 5; i++) {
+           id += chars.charAt(Math.floor(Math.random() * chars.length));
+       }
+   
+       return id;
+   };
     const renderHeader = () => {
         return (
             <div className="flex flex-wrap gap-2 justify-content-between align-items-center">
@@ -280,10 +335,12 @@ const[deleteTeamById]=useDeleteTeamMutation()
             </>
         );
     };
-
-    // const actionBodyTemplate = () => {
-    //     return <Button type="button" icon="pi pi-cog" rounded></Button>;
-    // };
+ const onInputChange = (e, name) => {
+     const val = (e.target && e.target.value) || '';
+     let _team = { ...team };
+     _team[`${name}`] = val;
+     setTeam(_team);
+ };
  const deleteTeamDialogFooter = (
         <React.Fragment>
             <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteTeamsDialog} />
@@ -300,6 +357,7 @@ const[deleteTeamById]=useDeleteTeamMutation()
 
     return (
         <div className="card">
+            <Toolbar className="mb-4" left={leftToolbarTemplate} ></Toolbar>
             <DataTable value={teams} paginator header={header} rows={10}
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                     rowsPerPageOptions={[10, 25, 50]} dataKey="id" selectionMode="checkbox" selection={selectedTeams} onSelectionChange={(e) => setSelectedTeams(e.value)}
@@ -317,19 +375,45 @@ const[deleteTeamById]=useDeleteTeamMutation()
                 <Column headerStyle={{ width: '5rem', textAlign: 'center' }} bodyStyle={{ textAlign: 'center', overflow: 'visible' }} body={actionBodyTemplate} />
             </DataTable>
 
-            <Dialog visible={deleteTeamDialog} style={{ width: '32rem' }} header="Confirm" modal footer={deleteTeamDialogFooter} onHide={() => setDeleteTeamDialog(false)}>
-    <div className="confirmation-content">
-        <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-        {team && <span>Are you sure you want to delete <b>{team?.name}</b>?</span>}
-    </div>
-</Dialog>
+            <Dialog visible={teamDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Team Details" modal className="p-fluid" footer={teamDialogFooter} onHide={hideDialog}>
+              {team.image && <img src={`https://primefaces.org/cdn/primereact/images/product/${team?.image}`} alt={team?.image} className="team-image block m-auto pb-3" />}
+              <div className="field">
+                  <label htmlFor="name" className="font-bold">
+                      Name
+                  </label>
+                  <InputText id="name" value={team.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !team.name })} />
+                  {submitted && !team.name && <small className="p-error">Name is required.</small>}
+              </div>
+              
+                 
+              
+              <div className="formgrid grid">
+                  <div className="field col">
+                      <label htmlFor="price" className="font-bold">
+                          Price
+                      </label>
+                      {/* <InputNumber id="price" value={product.price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="USD" locale="en-US" /> */}
+                  </div>
+                  
+              </div>
+          </Dialog>
 
-<Dialog visible={deleteTeamsDialog} style={{ width: '32rem' }} header="Confirm" modal footer={deleteTeamsDialogFooter} onHide={() => setDeleteTeamsDialog(false)}>
-    <div className="confirmation-content">
-        <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-        {teams && <span>Are you sure you want to delete the selected teams?</span>}
-    </div>
-</Dialog>
+        <Dialog visible={deleteTeamDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteTeamDialogFooter} onHide={hideDeleteTeamsDialog}>
+            <div className="confirmation-content">
+                <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                {team && (
+                    <span>
+                        Are you sure you want to delete <b>{team.name}</b>?
+                    </span>
+                )}
+            </div>
+        </Dialog>
+        <Dialog visible={deleteTeamsDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteTeamsDialogFooter} onHide={hideDeleteTeamsDialog}>
+            <div className="confirmation-content">
+                <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                {team && <span>Are you sure you want to delete the selected teams?</span>}
+            </div>
+        </Dialog>
 
         </div>
 
