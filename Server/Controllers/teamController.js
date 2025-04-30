@@ -1,4 +1,5 @@
 const Team=require("../Models/team.model")
+const mongoose=require("mongoose")
 
 const getAllUserTeams=async(req,res)=>{
     try{
@@ -28,24 +29,38 @@ const getTeamById=async(req,res)=>{
   }
 }
 
-const createTeam = async (req,res)=>{
-    try{
-    const {name,createdBy,members} = req.body
-    if(!name|!createdBy|!members)
-        res.status(404).json("name , members and createdBy are required")
-    const team = await Team.create({name,createdBy,members});
-    res.json(team)
-}
-    catch (err) {
-        res.status(500).json({ message: 'Failed to create team' });
-      }  
-}
+const createTeam = async (req, res) => {
+  try {
+    const { name, createdBy, members } = req.body;
+
+    if (!name || !createdBy || !members)
+      return res.status(400).json({ message: "name, createdBy and members are required" });
+
+    const createdByObjectId = new mongoose.Types.ObjectId(createdBy);
+
+    const memberObjectIds = members.map(userId => new mongoose.Types.ObjectId(userId));
+
+    const team = await Team.create({
+      name,
+      createdBy: createdByObjectId,
+      members: memberObjectIds
+    });
+
+    res.json(team);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Failed to create team' });
+  }
+};
+
 
 const editTeam=async(req,res)=>{
     try{
         const { id } = req.params;
-        const {name,createdBy,members,description}=req.body
-        const team = await Team.findById(id);
+        const idObjectId = new mongoose.Types.ObjectId(id);
+
+        const {name,createdBy,members}=req.body
+        const team = await Team.findById(idObjectId);
 
         if (!team) return res.status(404).json({ message: 'Team not found' });
 
@@ -63,13 +78,16 @@ const editTeam=async(req,res)=>{
 const deleteTeam=async(req,res)=>{
     try{
     const id=req.params
-    const team=await Team.findById(id)
+    const idObjectId = new mongoose.Types.ObjectId(id);
+
+    const team=await Team.findById(idObjectId)
     if(!team)
         res.status(404).send(`'Team not found'`)
-    await Team.findByIdAndDelete(id);
+    await Team.findByIdAndDelete(idObjectId);
     res.json({ message: 'Team deleted successfully' });
 }
 catch (err) {
+  console.log(err)
     res.status(500).json({ message: 'Failed to delete team' });
   }
 }

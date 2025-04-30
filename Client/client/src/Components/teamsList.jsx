@@ -6,36 +6,83 @@ import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
 import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
-import { Dropdown } from 'primereact/dropdown';
-import { InputNumber } from 'primereact/inputnumber';
 import { Button } from 'primereact/button';
 import { ProgressBar } from 'primereact/progressbar';
-import { Calendar } from 'primereact/calendar';
-import { MultiSelect } from 'primereact/multiselect';
 import { Slider } from 'primereact/slider';
 import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
-import {  useDeleteTeamMutation, useGetTeamsQuery } from '../slices/teamSlice';
+import {  useDeleteTeamMutation, useGetTeamsQuery ,useEditTeamMutation,useAddTeamMutation} from '../slices/teamSlice';
 import { Dialog } from 'primereact/dialog';
 import { classNames } from 'primereact/utils';
 
 export default function TeamsList() {
-   const [teams, setTeams] = useState([]);
-   const {data,isError,isLoading,isSuccess,error}=useGetTeamsQuery()
+    const [teams, setTeams] = useState([]);
+    const {data,isError,isLoading,isSuccess,error}=useGetTeamsQuery()
     const [selectedTeams, setSelectedTeams] = useState([]);
     const [deleteTeamDialog, setDeleteTeamDialog] = useState(false);
-const [deleteTeamsDialog, setDeleteTeamsDialog] = useState(false);
-const[deleteTeamById]=useDeleteTeamMutation()
-   let emptyTeam={
-    name:'new Team',
-    userId:"68062f23c50312e341e8bf72"
+    const [deleteTeamsDialog, setDeleteTeamsDialog] = useState(false);
+    const [editTeamById] = useEditTeamMutation();
+    const [addTeam]=useAddTeamMutation()
+    const[deleteTeamById]=useDeleteTeamMutation()
+    const toast = useRef(null)
+   
+    let emptyTeam={
+        name:'new Team',
+        userId:"68062f23c50312e341e8bf72"
 
-}
-   const [submitted, setSubmitted] = useState(false);
+    }
+    
+    const addTeamToDB = async (team) => {
+        try {
+            const res = await addTeam(team).unwrap();
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'Team Created', life: 3000 });
+            console.log('res',res)
+            return res;
+        } catch (error) {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to create team', life: 3000 });
+            throw error;
+        }
+    };
+    
+
+    const editTeamToDB = async (team) => {
+        try {
+            await editTeamById(team).unwrap();
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'Team Updated', life: 3000 });
+        } catch (error) {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to update team', life: 3000 });
+        }
+    };
+const saveTeam = async () => {
+    setSubmitted(true);
+    if (!team.name.trim()) return;
+
+    let _team = { ...team };
+
+    try {
+        if (_team._id) {
+            await editTeamToDB(_team); 
+            const updatedTeams = teams.map(t => t._id === _team._id ? _team : t);
+            setTeams(updatedTeams);
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'Team Updated', life: 3000 });
+        } else {
+            _team._id = createId();
+            const res = await addTeamToDB(_team); 
+            setTeams([...teams, res.data]); 
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'Team Created', life: 3000 });
+        }
+
+        setTeamDialog(false);
+        setTeam(emptyTeam);
+    } catch (error) {
+        toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to save team', life: 3000 });
+    }
+};
+
+    const [submitted, setSubmitted] = useState(false);
     const [teamDialog, setTeamDialog] = useState(false);
     const [team, setTeam] = useState(emptyTeam);
-    const toast = useRef(null);
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
@@ -46,40 +93,13 @@ const[deleteTeamById]=useDeleteTeamMutation()
         status: { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
         activity: { value: null, matchMode: FilterMatchMode.BETWEEN }
     });
-    
-   
     const [globalFilterValue, setGlobalFilterValue] = useState('');
-    const [representatives] = useState([
-        { name: 'Amy Elsner', image: 'amyelsner.png' },
-        { name: 'Anna Fali', image: 'annafali.png' },
-        { name: 'Asiya Javayant', image: 'asiyajavayant.png' },
-        { name: 'Bernardo Dominic', image: 'bernardodominic.png' },
-        { name: 'Elwin Sharvill', image: 'elwinsharvill.png' },
-        { name: 'Ioni Bowcher', image: 'ionibowcher.png' },
-        { name: 'Ivan Magalhaes', image: 'ivanmagalhaes.png' },
-        { name: 'Onyama Limba', image: 'onyamalimba.png' },
-        { name: 'Stephen Shaw', image: 'stephenshaw.png' },
-        { name: 'XuXue Feng', image: 'xuxuefeng.png' }
-    ]);
-    const [statuses] = useState(['unqualified', 'qualified', 'new', 'negotiation', 'renewal']);
-
-    const getSeverity = (status) => {
-        switch (status) {
-            case 'unqualified':
-                return 'danger';
-
-            case 'qualified':
-                return 'success';
-
-            case 'new':
-                return 'info';
-
-            case 'negotiation':
-                return 'warning';
-
-            case 'renewal':
-                return null;
-        }
+   
+    const hideDialog = () => {
+        setSubmitted(false);
+        setTeamDialog(false);
+        setDeleteTeamDialog(false);
+        console.log('hideDialog')
     };
     const teamDialogFooter = (
         <React.Fragment>
@@ -102,9 +122,14 @@ const[deleteTeamById]=useDeleteTeamMutation()
         setTeamDialog(true);
     };
     useEffect(() => {
-        setTeams(data)
+        if (Array.isArray(data)) {
+            setTeams(data);
+        } else {
+            setTeams([]); 
+        }
         
     }, [data]); 
+
 
     const getTeams = (data) => {
         
@@ -130,15 +155,25 @@ const[deleteTeamById]=useDeleteTeamMutation()
         setDeleteTeamsDialog(false);
     };
 
-    const confirmDeleteTeam = async(team) => {
+    const confirmDeleteTeam = (team) => {
+        
+        setTeam(team);
+        
+        setDeleteTeamDialog(true);
+        console.log(`confirmDeleteTeam ${team}`)
+    };
+    
+    
+    const deleteConfirmedTeam = async () => {
         try {
             await deleteTeamById(team).unwrap();
             toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'Team Deleted', life: 3000 });
             setDeleteTeamDialog(false);
-          } catch (error) {
+        } catch (error) {
             toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to delete team', life: 3000 });
-          }
+        }
     };
+    
     
     const confirmDeleteSelected = () => {
         setDeleteTeamsDialog(true);
@@ -146,22 +181,25 @@ const[deleteTeamById]=useDeleteTeamMutation()
     
 
     const deleteTeam = () => {
-        let _team = teams.filter((val) => val.id !== team.id);
+        let _team = teams.filter((val) => val._id !== team._id);
         setDeleteTeamsDialog(false);
         setTeam(emptyTeam);
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Team Deleted', life: 3000 });
+        toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'Team Deleted', life: 3000 });
     };
 
+    const deleteSelectedTeams = async () => {
+        try {
+            await Promise.all(selectedTeams.map(t => deleteTeamById(t._id).unwrap()));
+            setTeams(teams.filter(t => !selectedTeams.some(sel => sel._id === t._id)));
+            setSelectedTeams(null);
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'Teams Deleted', life: 3000 });
+            setDeleteTeamsDialog(false);
+        } catch (error) {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to delete teams', life: 3000 });
+        }
+    };
     
 
-    const deleteSelectedTeams = () => {
-        let _team = teams.filter((val) => !selectedTeams.includes(val));
-
-        setTeam(_team);
-        setDeleteTeamsDialog(false);
-        setSelectedTeams(null);
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Team Deleted', life: 3000 });
-    };
     const onGlobalFilterChange = (e) => {
         const value = e.target.value;
         let _filters = { ...filters };
@@ -171,41 +209,18 @@ const[deleteTeamById]=useDeleteTeamMutation()
         setFilters(_filters);
         setGlobalFilterValue(value);
     };
-    const hideDialog = () => {
-         setSubmitted(false);
-         setTeamDialog(false);
-     };
+   
 const findIndexById = (id) => {
     let index = -1;
     for (let i = 0; i < teams.length; i++) {
-        if (teams[i].id === id) {
+        if (teams[i]._id === id) {
             index = i;
             break;
         }
     }
     return index;
 };
-   const saveTeam = () => {
-   setSubmitted(true);
-   if (team.name.trim()) {
-       let _teams = [...teams];
-       let _team = { ...team };
 
-         if (team._id) {
-             const index = findIndexById(team._id);
-             _teams[index] = _team;
-             toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Team Updated', life: 3000 });
-         } else {
-            _team.id = createId();
-            _team.image = 'team-placeholder.svg';
-            _teams.push(_team);
-             toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Team Created', life: 3000 });
-         }
-         setTeams(_teams);
-         setTeamDialog(false);
-         setTeam(emptyTeam);
-     }
- };
  const createId = () => {
        let id = '';
        let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -249,77 +264,15 @@ const findIndexById = (id) => {
          setTeam({ ...team });
          setTeamDialog(true);
      };
-    const representativeBodyTemplate = (rowData) => {
-    const representative = rowData.representative;
-
-        return (
-            <div className="flex align-items-center gap-2">
-                <img alt={representative?.name} src={`https://primefaces.org/cdn/primereact/images/avatar/${representative?.image}`} width="32" />
-                <span>{representative?.name}</span>
-            </div>
-        );
-    };
-
-    const representativeFilterTemplate = (options) => {
-        return (
-            <React.Fragment>
-                <div className="mb-3 font-bold">Agent Picker</div>
-                <MultiSelect value={options.value} options={representatives} itemTemplate={representativesItemTemplate} onChange={(e) => options.filterCallback(e.value)} optionLabel="name" placeholder="Any" className="p-column-filter" />
-            </React.Fragment>
-        );
-    };
-
-    const representativesItemTemplate = (option) => {
-        return (
-            <div className="flex align-items-center gap-2">
-                <img alt={option?.name} src={`https://primefaces.org/cdn/primereact/images/avatar/${option.image}`} width="32" />
-                <span>{option?.name}</span>
-            </div>
-        );
-    };
-
-    const dateBodyTemplate = (rowData) => {
-        return formatDate(rowData?.createdAt);
-    };
-
-    const dateFilterTemplate = (options) => {
-        return <Calendar value={options.value} onChange={(e) => options.filterCallback(e.value, options.index)} dateFormat="mm/dd/yy" placeholder="mm/dd/yyyy" mask="99/99/9999" />;
-    };
-
-    const balanceBodyTemplate = (rowData) => {
-        return formatCurrency(rowData.balance);
-    };
-
-    const balanceFilterTemplate = (options) => {
-        return <InputNumber value={options.value} onChange={(e) => options.filterCallback(e.value, options.index)} mode="currency" currency="USD" locale="en-US" />;
-    };
-
-    const statusBodyTemplate = (rowData) => {
-        return <Tag value={rowData.status} severity={getSeverity(rowData.status)} />;
-    };
-
-    const statusFilterTemplate = (options) => {
-        return <Dropdown value={options.value} options={statuses} onChange={(e) => options.filterCallback(e.value, options.index)} itemTemplate={statusItemTemplate} placeholder="Select One" className="p-column-filter" showClear />;
-    };
+   
     const membersBodyTemplate = (rowData) => {
         console.log(`rowData ${rowData.members}`);
-         const members = rowData.members || [];
-         let memberNames=''
-         if (Array.isArray(rowData.members))
-            memberNames= rowData.members.map(member => member.name).join(', ') 
-        else
-            memberNames='No members';
-        //console.log(members);
-        return <span>{memberNames}</span>;
-        
+        const members = rowData.members;
+        if (!Array.isArray(members)) return <span>No members</span>;
+
+        return <span>{members.map(member => member.name).join(', ')}</span>;
       };
     
-      
-      
-    const statusItemTemplate = (option) => {
-        return <Tag value={option} severity={getSeverity(option)} />;
-    };
-
     const activityBodyTemplate = (rowData) => {
         return <ProgressBar value={rowData.activity} showValue={false} style={{ height: '6px' }}></ProgressBar>;
     };
@@ -360,7 +313,7 @@ const findIndexById = (id) => {
             <Toolbar className="mb-4" left={leftToolbarTemplate} ></Toolbar>
             <DataTable value={teams} paginator header={header} rows={10}
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    rowsPerPageOptions={[10, 25, 50]} dataKey="id" selectionMode="checkbox" selection={selectedTeams} onSelectionChange={(e) => setSelectedTeams(e.value)}
+                    rowsPerPageOptions={[10, 25, 50]} dataKey="_id" selectionMode="checkbox" selection={selectedTeams} onSelectionChange={(e) => setSelectedTeams(e.value)}
                     filters={filters} filterDisplay="menu" globalFilterFields={['name', 'team?.name', 'representative?.name', 'balance', 'status']}
                     emptyMessage="No teams found." currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
                 <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
@@ -368,9 +321,6 @@ const findIndexById = (id) => {
                 
                 <Column field="members" header="members" sortable filterField="team?.name" style={{ minWidth: '14rem' }} body={membersBodyTemplate} filter filterPlaceholder="Search by name" />
                 <Column field="createdBy.name" header="Admin"  sortable filter filterPlaceholder="Search by admin" style={{ minWidth: '14rem' }}/>
-                <Column header="Agent" sortable sortField="representative?.name" filterField="representative" showFilterMatchModes={false} filterMenuStyle={{ width: '14rem' }}
-                    style={{ minWidth: '14rem' }} body={representativeBodyTemplate} filter filterElement={representativeFilterTemplate} />
-                
                 <Column field="activity" header="Activity" sortable showFilterMatchModes={false} style={{ minWidth: '12rem' }} body={activityBodyTemplate} filter filterElement={activityFilterTemplate} />
                 <Column headerStyle={{ width: '5rem', textAlign: 'center' }} bodyStyle={{ textAlign: 'center', overflow: 'visible' }} body={actionBodyTemplate} />
             </DataTable>
@@ -398,16 +348,20 @@ const findIndexById = (id) => {
               </div>
           </Dialog>
 
-        <Dialog visible={deleteTeamDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteTeamDialogFooter} onHide={hideDeleteTeamsDialog}>
-            <div className="confirmation-content">
-                <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                {team && (
-                    <span>
-                        Are you sure you want to delete <b>{team.name}</b>?
-                    </span>
-                )}
-            </div>
-        </Dialog>
+          <Dialog
+    visible={deleteTeamDialog}
+    onHide={() => setDeleteTeamDialog(false)}
+    header="Confirm Delete"
+    footer={
+        <div>
+            <Button label="No" icon="pi pi-times" onClick={() => setDeleteTeamDialog(false)} />
+            <Button label="Yes" icon="pi pi-check" onClick={deleteConfirmedTeam} />
+        </div>
+    }
+>
+    <p>Are you sure you want to delete this team?</p>
+</Dialog>
+
         <Dialog visible={deleteTeamsDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteTeamsDialogFooter} onHide={hideDeleteTeamsDialog}>
             <div className="confirmation-content">
                 <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />

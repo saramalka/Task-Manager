@@ -14,6 +14,14 @@ const teamApiSlice=apiSlice.injectEndpoints({
             }),
             
         }),
+       addTeam:build.mutation({
+          query:(team)=>({
+            url:'/api/team',
+            method:'POST',
+            body:team
+          }),
+          invalidatesTags:["Teams"]
+       }),
         deleteTeam:build.mutation({
             query:(team)=>({
                 url:`/api/team/${team._id}`,
@@ -24,7 +32,7 @@ const teamApiSlice=apiSlice.injectEndpoints({
         }),
         deleteTeams: build.mutation({
             query: (ids) => ({
-              url: `/teams`,
+              url: `/api/team`,
               method: 'DELETE',
               body: ids,
             }),
@@ -32,7 +40,7 @@ const teamApiSlice=apiSlice.injectEndpoints({
           }),
         editTeam:build.mutation({
             query:(team)=>({
-                url:`api/team`,
+                url:`api/team/${team._id}`,
                 method:"PUT",
                 body:team
             }),
@@ -56,4 +64,11 @@ const teamApiSlice=apiSlice.injectEndpoints({
     })
 })
 
-export const {useGetTeamsQuery,useDeleteTeamMutation,useDeleteTeamsMutation,useEditTeamMutation,useGetTeamByIdQuery,useAddMemberToTeamMutation,useRemoveMemberFromTeamMutation}=teamApiSlice
+export const {useGetTeamsQuery,
+  useAddTeamMutation,
+  useDeleteTeamMutation,
+  useDeleteTeamsMutation,
+  useEditTeamMutation,
+  useGetTeamByIdQuery,
+  useAddMemberToTeamMutation,
+  useRemoveMemberFromTeamMutation}=teamApiSlice
