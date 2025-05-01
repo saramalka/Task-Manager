@@ -5,16 +5,19 @@ const userSlice=createSlice({
     initialState:{
         token:localStorage.getItem("token")||"",
         isLoggedIn:localStorage.getItem("token")?true:false,
-        name:localStorage.getItem("name") || ""
+        name:localStorage.getItem("name") || "",
+        role:localStorage.getItem("role")||"member"
     },
     reducers:{
         setToken:(state,action)=>{
-            const {name,token}=action.payload
+            const {name,role,token}=action.payload
             state.token=token
             state.isLoggedIn=true
             state.name=name
+            state.role=role
             localStorage.setItem("token",token)
-            localStorage.setItem("name", name);
+            localStorage.setItem("name", name)
+            localStorage.setItem("role",role)
         },
         removeToken:(state)=>{
             state.token=""
@@ -22,6 +25,7 @@ const userSlice=createSlice({
             state.name=""
             localStorage.removeItem("token")
             localStorage.removeItem("name")
+            localStorage.removeItem("role")
         }
     }
 })

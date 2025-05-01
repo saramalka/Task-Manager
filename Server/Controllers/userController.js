@@ -4,29 +4,32 @@ const User=require("../Models/user.model")
 const mongoose=require("mongoose")
 
 const register=async(req,res)=>{
-    const {name,password,email}=req.body
+    const {name,password,email,role}=req.body
     if (!name || !password || !email)
-            res.status(404).json({error:true, message:"name,password and email are required"})
+          return res.status(404).json({error:true, message:"name,password and email are required"})
     const duplicate = await User.findOne({email}).lean()
     if(duplicate){
         return res.status(409).json({message:"Duplicate username"})
     }
     const passwordHash = await bcrypt.hash(password, 10);
-    const user=await User.create({name,password:passwordHash,email})
+    const user=await User.create({name,password:passwordHash,email,role})
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
     if (user) { 
-        return res.status(201).json({
-            user: {
-              _id: user._id,
-              name: user.name,
-              email: user.email,
-            },
-            token,
-          });
+      return res.status(200).json({
+        token,
+        user: {
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      });
+      
+       
     } 
     else {
-        return res.status(400).json({ message: 'Invalid user' })
+        return res.status(500).json({ message: 'Internal server error' });
+
     }
 }
 
@@ -47,8 +50,8 @@ const getAllUsers= async (req, res) => {
 
 const apdateUser=async(req,res)=>{
     const{name,_id,password,email,teams,role}=req.body
-    if(!name||!password||!_id|!email)
-        res.status(400).json('name, id and username are required fields')
+    if (!name || !password || !_id || !email)
+       return res.status(400).json('name, id and username are required fields')
     const idObjectId = new mongoose.Types.ObjectId(_id);
     const user= await User.findById(idObjectId).exec()
     if(!user)
@@ -87,9 +90,9 @@ const getUserByID = async (req, res) => {
         res.json(user)
         }
 
-        const login = async (req, res) => {
+const login = async (req, res) => {
             try {
-              const { email, password } = req.body;
+              const { email, password} = req.body;
               console.log("req.body:", req.body);
 
               const user = await User.findOne({ email });
@@ -109,7 +112,7 @@ const getUserByID = async (req, res) => {
               console.error('Login error:', err);
               res.status(500).json({ message: 'Internal server error' });
             }
-          };
+  };
 
 const checkEmail=async(req, res) => {
     const { email } = req.body;

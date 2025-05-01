@@ -6,14 +6,18 @@ import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import 'primeflex/primeflex.css';
+import { useDispatch } from 'react-redux';
+import { setToken } from '../slices/userSlice';
 
-export default function SignUpForm({ onLogin }) {
+export default function SignUpForm() {
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [email, setEmail] = React.useState('');
+  const [role, setRole] = React.useState('member');
   const [addUser,{isError,error,isSuccess}]=useAddUserMutation()
   const [checkEmail] = useCheckEmailMutation()
   const navigate = useNavigate();
+  const dispatch=useDispatch()
 
   useEffect(()=>{
     if(isSuccess)
@@ -29,21 +33,23 @@ export default function SignUpForm({ onLogin }) {
     }
   };
 
-  const handleSubmit=async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault(); 
-    try{
-   
-    const res=addUser({ name:username, password,email }).unwrap()
-    console.log('Log in success:', res);
-    
-  }catch(err){
-    console.log('Full error object:', JSON.stringify(err, null, 2));
-
-    console.error('Failed to register:', err);
-    alert('Registration failed. Please try again.');
+    try {
+      const res = await addUser({ name: username, password, role, email }).unwrap();
+  
+      if (res?.token) {
+        dispatch(setToken({ token: res.token, name: res.name, role: res.role }));
+      }
+  
+      console.log('register:', res);
+    } catch (err) {
+      console.error('Register failed:', JSON.stringify(err, null, 2));
+      alert('Register failed: ' + (err?.data?.message || err?.error || 'Unknown error'));
+    }
   }
+  
 
-  };
 
   const handleGoToLogin = () => {
     console.log('handleGoToLogin');
@@ -61,6 +67,14 @@ export default function SignUpForm({ onLogin }) {
               id="username" 
               value={username} 
               onChange={e => setUsername(e.target.value)} 
+            />
+          </div>
+          <div className="p-field">
+            <label htmlFor="role">Role</label>
+            <InputText 
+              id="role" 
+              value={role} 
+              onChange={e => setRole(e.target.value)} 
             />
           </div>
           <div className="p-field">

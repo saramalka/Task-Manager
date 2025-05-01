@@ -1,20 +1,28 @@
-
-import React from 'react'; 
-import { Menubar } from 'primereact/menubar';
-import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { removeToken } from '../slices/userSlice';
 import { useNavigate } from 'react-router';
+import { useSelector } from 'react-redux';
+import { Menubar } from 'primereact/menubar';
 
 export default function Menu() {
-    const navigate=useNavigate()
-    const isUserLoggedIn=useSelector((state)=>state.auth.isUserLoggedIn)
-    
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const isUserLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+    const role = useSelector((state) => state.auth.role);
+
+    const handleLogout = () => {
+        dispatch(removeToken());
+        navigate('/dashboard'); 
+    };
+
     const commonItems = [
         {
             label: 'Dashboard',
             command: () => navigate('/dashboard'),
         },
     ];
-    const loggedInItems = [
+
+    const adminItems = [
         {
             label: 'Profile',
             command: () => navigate('/profile'),
@@ -25,7 +33,7 @@ export default function Menu() {
         },
         {
             label: 'Team Tasks',
-            command: () => navigate('/teams/123/tasks'), // אפשר לשים דינאמי לפי הצורך
+            command: () => navigate('/teams/123/tasks'),
         },
         {
             label: 'Task Details',
@@ -40,45 +48,24 @@ export default function Menu() {
         },
     ];
 
-    const items = [
-        ...commonItems,
-        ...(isUserLoggedIn ? loggedInItems : guestItems),
-    ];
-    // const items = [
-    //     {
-    //         label: 'Profile',
-    //         url: '/profile'
-            
-    //     },
-    //     {
-    //         label: 'Dashboard',
-    //         url: '/dashboard'
-            
-    //     },
-    //     {
-    //         label: 'Register',
-           
-    //        url:'/register'
-    //     },
-    //     {
-    //         label: 'My Teams',
-    //         url:'/teams'
-    //     }
-    //     ,
-    //     {
-    //         label: 'Team Tasks',
-    //         url:'/teams/:teamId/tasks'
-    //     },
-    //     {
-    //         label: 'Task Details',
-    //         url:'/tasks/:taskId'
-    //     }
-    // ];
+    let items = [...commonItems];
+
+    if (isUserLoggedIn) {
+        if (role === 'admin') {
+            items = [...items, ...adminItems];
+        }
+        items.push({
+            label: 'Logout',
+            //icon: 'pi pi-sign-out',
+            command: handleLogout,
+        });
+    } else {
+        items = [...items, ...guestItems];
+    }
 
     return (
         <div className="card">
             <Menubar model={items} />
         </div>
-    )
+    );
 }
-        

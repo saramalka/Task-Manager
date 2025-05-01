@@ -21,11 +21,12 @@ export default function LoginForm() {
     const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-        const res = await onLogin({email, password }).unwrap();
+        const data = await onLogin({email, password }).unwrap();
     
-        console.log('User login success:', res);
-        if (res?.token) {
-          dispatch(setToken({ token: res.token, name: res.user.name }));
+        console.log('User login success:', data);
+        if (data?.token) {
+          dispatch(setToken({ token: data.token, name: data.user.name ,role:data.user.role}))
+
           navigate('/dashboard');
         } else {
           throw new Error('Token missing from response');

@@ -7,7 +7,7 @@ const userApiSlice=apiSlice.injectEndpoints({
             query:()=>({
                 url:"/api/user"
             }),
-            providesTags:["User"]
+            providesTags:["Users"]
         }),
         getUserById:build.query({
             query:(id)=>({
@@ -41,7 +41,6 @@ const userApiSlice=apiSlice.injectEndpoints({
             query:(user)=>({
                 url:`/api/user/${user._id}`,
                 method:'DELETE',
-                body:userApiSlice
         }),
         invalidatesTags:["User"]
         }),
@@ -51,7 +50,7 @@ const userApiSlice=apiSlice.injectEndpoints({
                 method:"PUT",
                 body:user
             }),
-            invalidatesTags:["Uesrs"]
+            invalidatesTags:["Uesrs"] 
         }),
          
     })
