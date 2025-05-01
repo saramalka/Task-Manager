@@ -38,7 +38,9 @@ const createTeam = async (req, res) => {
 
     const createdByObjectId = new mongoose.Types.ObjectId(createdBy);
 
-    const memberObjectIds = members.map(userId => new mongoose.Types.ObjectId(userId));
+    const memberObjectIds = members.map(user =>({"_id": new mongoose.Types.ObjectId(user._id),
+      "role":user.role??"member"
+    }));
 
     const team = await Team.create({
       name,

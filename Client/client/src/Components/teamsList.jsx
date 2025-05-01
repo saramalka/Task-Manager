@@ -12,7 +12,7 @@ import { Slider } from 'primereact/slider';
 import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
-import {  useDeleteTeamMutation, useGetTeamsQuery ,useEditTeamMutation,useAddTeamMutation} from '../slices/teamSlice';
+import {  useDeleteTeamMutation, useGetTeamsQuery ,useEditTeamMutation,useAddTeamMutation} from '../slices/teamApiSlice';
 import { Dialog } from 'primereact/dialog';
 import { classNames } from 'primereact/utils';
 

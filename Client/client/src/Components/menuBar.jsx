@@ -17,9 +17,9 @@ export default function Menu() {
             
         },
         {
-            label: 'Login',
+            label: 'Register',
            
-           url:'/login'
+           url:'/register'
         },
         {
             label: 'My Teams',

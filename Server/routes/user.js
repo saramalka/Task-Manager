@@ -8,6 +8,7 @@ router.use(express.json())
 
 router.get("/",userController.getAllUsers)
 router.post('/login', userController.login);
+router.post('/check-email',userController.checkEmail)
 router.get('/me', verifyToken, userController.getMe);
 router.get("/:id",userController.getUserByID)
 router.post("/",userController.register)
