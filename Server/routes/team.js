@@ -1,8 +1,8 @@
 const express=require("express")
 const router=express.Router()
 const teamController = require('../Controllers/teamController');
-const { verifyToken } = require('../config/verifyToken');
-const { isAdmin } = require('../config/role.middleware');
+const { verifyToken } = require('../middleware/verifyToken.middlware');
+const { isAdmin } = require('../middleware/role.middleware');
 
 router.use(express.json())
 

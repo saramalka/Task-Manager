@@ -1,40 +1,79 @@
 
 import React from 'react'; 
 import { Menubar } from 'primereact/menubar';
-//import { useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
 
 export default function Menu() {
-    //const router = useRouter();
-    const items = [
-        {
-            label: 'Profile',
-            url: '/profile'
-            
-        },
+    const navigate=useNavigate()
+    const isUserLoggedIn=useSelector((state)=>state.auth.isUserLoggedIn)
+    
+    const commonItems = [
         {
             label: 'Dashboard',
-            url: '/dashboard'
-            
+            command: () => navigate('/dashboard'),
         },
+    ];
+    const loggedInItems = [
         {
-            label: 'Register',
-           
-           url:'/register'
+            label: 'Profile',
+            command: () => navigate('/profile'),
         },
         {
             label: 'My Teams',
-            url:'/teams'
-        }
-        ,
+            command: () => navigate('/teams'),
+        },
         {
             label: 'Team Tasks',
-            url:'/teams/:teamId/tasks'
+            command: () => navigate('/teams/123/tasks'), // אפשר לשים דינאמי לפי הצורך
         },
         {
             label: 'Task Details',
-            url:'/tasks/:taskId'
-        }
+            command: () => navigate('/api/tasks/456'),
+        },
     ];
+
+    const guestItems = [
+        {
+            label: 'Register',
+            command: () => navigate('/register'),
+        },
+    ];
+
+    const items = [
+        ...commonItems,
+        ...(isUserLoggedIn ? loggedInItems : guestItems),
+    ];
+    // const items = [
+    //     {
+    //         label: 'Profile',
+    //         url: '/profile'
+            
+    //     },
+    //     {
+    //         label: 'Dashboard',
+    //         url: '/dashboard'
+            
+    //     },
+    //     {
+    //         label: 'Register',
+           
+    //        url:'/register'
+    //     },
+    //     {
+    //         label: 'My Teams',
+    //         url:'/teams'
+    //     }
+    //     ,
+    //     {
+    //         label: 'Team Tasks',
+    //         url:'/teams/:teamId/tasks'
+    //     },
+    //     {
+    //         label: 'Task Details',
+    //         url:'/tasks/:taskId'
+    //     }
+    // ];
 
     return (
         <div className="card">

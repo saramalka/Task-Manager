@@ -1,66 +1,46 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Card } from 'primereact/card';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import {useLoginUserMutation}from '../slices/userApiSlice'
 import { useNavigate } from 'react-router-dom';
+import { setToken } from '../slices/userSlice';
+import { useDispatch } from 'react-redux';
 import 'primeflex/primeflex.css';
 
 export default function LoginForm() {
   const navigate = useNavigate();
-  const [onLogin,{isSuccess,data,isError,error}]=useLoginUserMutation()
+  const dispatch=useDispatch()
+  const [onLogin,{isLoading}]=useLoginUserMutation()
   const [username, setUsername] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
 
-    useEffect(()=>{
-      if(isSuccess){
-        console.log(data);
-        
-        navigate('/dashboard')
-      }
-      if(isError){
-        console.log(error);
-        
-      }
-    },[isSuccess,isError])
 
-  // const handleSubmit = async(e) => {
-  //   e.preventDefault();
-  //   console.log('handleSubmit login');
-  //   console.log('email:', email, 'password:', password);
-
-   
-  //   try{
-  //   const res=await onLogin({ email, password }).unwrap()
-  //   console.log(`user login ${res}`);
-  //   navigate('/dashboard')
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      try {
+        const res = await onLogin({email, password }).unwrap();
     
-  // }catch(err){
-  //   console.error('Login failed:', err?.data?.message || err);
-  //   alert('Login failed: ' + (err?.data?.message || 'Unknown error'));
+        console.log('User login success:', res);
+        if (res?.token) {
+          dispatch(setToken({ token: res.token, name: res.user.name }));
+          navigate('/dashboard');
+        } else {
+          throw new Error('Token missing from response');
+        }
+      } catch (err) {
+        console.error('Login failed:', err?.data?.message || err.message || err);
+        alert('Login failed: ' + (err?.data?.message || err.message || 'Unknown error'));
+      }
+    };
     
-  // }
-  // };
-  const handleSubmit = async (e) => {
-    console.log('handleSubmit login');
-    e.preventDefault();
-  
-    try {
-      console.log('before login call');
-      const res = await onLogin({ email, password }).unwrap();
-      console.log('after login call');
-      console.log('user login', res);
-      navigate('/dashboard');
-    } catch (err) {
-      console.error('Login failed:', err?.data?.message || err);
-      alert('Login failed: ' + (err?.data?.message || 'Unknown error'));
-    }
-  };
   
   return (
+    
     <div className="p-d-flex p-jc-center p-ai-center" style={{ height: '100vh' }}>
+      {isLoading ? <h1>Loading</h1>:
       <Card title="Login" style={{ width: '24rem' }}>
         <form onSubmit={handleSubmit} className="p-fluid">
           <div className="p-field">
@@ -90,7 +70,7 @@ export default function LoginForm() {
           </div>
           <Button label="Log In" icon="pi pi-sign-in" type="submit" className="p-mt-2" />
         </form>
-      </Card>
+      </Card>}
     </div>
   );
 }

@@ -1,8 +1,8 @@
 const express=require("express")
 const router=express.Router()
 const userController=require("../Controllers/userController")
-const {verifyToken}=require("../config/verifyToken")
-const {isAdmin}=require("../config/role.middleware")
+const {verifyToken}=require("../middleware/verifyToken.middlware")
+const {isAdmin}=require("../middleware/role.middleware")
 
 router.use(express.json())
 

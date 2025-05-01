@@ -5,17 +5,25 @@ const mongoose=require("mongoose")
 
 const register=async(req,res)=>{
     const {name,password,email}=req.body
-        if(!name|!password|!email)
+    if (!name || !password || !email)
             res.status(404).json({error:true, message:"name,password and email are required"})
-    const duplicate = await User.findOne({name}).lean()
+    const duplicate = await User.findOne({email}).lean()
     if(duplicate){
         return res.status(409).json({message:"Duplicate username"})
     }
     const passwordHash = await bcrypt.hash(password, 10);
-        const user=await User.create({name,password:passwordHash,email})
+    const user=await User.create({name,password:passwordHash,email})
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
     if (user) { 
-        return res.status(201).json(user)
+        return res.status(201).json({
+            user: {
+              _id: user._id,
+              name: user.name,
+              email: user.email,
+            },
+            token,
+          });
     } 
     else {
         return res.status(400).json({ message: 'Invalid user' })
@@ -79,18 +87,29 @@ const getUserByID = async (req, res) => {
         res.json(user)
         }
 
-const login = async (req, res) => {
-    console.log("LOGIN BODY", req.body);
+        const login = async (req, res) => {
+            try {
+              const { email, password } = req.body;
+              console.log("req.body:", req.body);
 
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ email }).lean();
-    console.log(user);
-    
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-}
+              const user = await User.findOne({ email });
+              if (!user) {
+                return res.status(401).json({ message: 'User not found' });
+              }
+          
+              const isMatch = await bcrypt.compare(password, user.password);
+              if (!isMatch) {
+                return res.status(401).json({ message: 'Invalid credentials' });
+              }
+          
+              const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+              res.status(200).json({ user, token });
+          
+            } catch (err) {
+              console.error('Login error:', err);
+              res.status(500).json({ message: 'Internal server error' });
+            }
+          };
 
 const checkEmail=async(req, res) => {
     const { email } = req.body;
@@ -101,15 +120,6 @@ const checkEmail=async(req, res) => {
     }
       
     res.status(200).json({ message: 'Email is available' });
-    
-          
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-          
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-          
-        res.json({ token });
         
     }  
           
