@@ -9,12 +9,12 @@ import { InputIcon } from 'primereact/inputicon';
 import { Button } from 'primereact/button';
 import { ProgressBar } from 'primereact/progressbar';
 import { Slider } from 'primereact/slider';
-import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import {  useDeleteTeamMutation, useGetTeamsQuery ,useEditTeamMutation,useAddTeamMutation} from '../slices/teamApiSlice';
+import getUserIdFromToken from '../getToken'
 import { Dialog } from 'primereact/dialog';
-import { classNames } from 'primereact/utils';
+import TeamDetails from './teamDetails';
 
 export default function TeamsList() {
     const [teams, setTeams] = useState([]);
@@ -29,8 +29,7 @@ export default function TeamsList() {
    
     let emptyTeam={
         name:'new Team',
-        userId:"68062f23c50312e341e8bf72"
-
+        createdBy:"68062f23c50312e341e8bf72"
     }
     
     const addTeamToDB = async (team) => {
@@ -56,9 +55,18 @@ export default function TeamsList() {
     };
 const saveTeam = async () => {
     setSubmitted(true);
+    console.log('team being:', team);
     if (!team.name.trim()) return;
 
-    let _team = { ...team };
+    const createdBy = getUserIdFromToken();
+
+  
+  if (!createdBy) {
+    console.log("User is not logged in.");
+  }else   console.log(`createdBy ${createdBy}`);
+
+    let _team = { ...team,createdBy:createdBy };
+    console.log('team being sent:', _team);
 
     try {
         if (_team._id) {
@@ -67,7 +75,7 @@ const saveTeam = async () => {
             setTeams(updatedTeams);
             toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'Team Updated', life: 3000 });
         } else {
-            _team._id = createId();
+            
             const res = await addTeamToDB(_team); 
             setTeams([...teams, res.data]); 
             toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'Team Created', life: 3000 });
@@ -94,20 +102,7 @@ const saveTeam = async () => {
         activity: { value: null, matchMode: FilterMatchMode.BETWEEN }
     });
     const [globalFilterValue, setGlobalFilterValue] = useState('');
-   
-    const hideDialog = () => {
-        setSubmitted(false);
-        setTeamDialog(false);
-        setDeleteTeamDialog(false);
-        console.log('hideDialog')
-    };
-    const teamDialogFooter = (
-        <React.Fragment>
-            <Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
-            <Button label="Save" icon="pi pi-check" onClick={saveTeam} />
-        </React.Fragment>
-    );
-    
+      
  const leftToolbarTemplate = () => {
         return (
             <div className="flex flex-wrap gap-2">
@@ -129,28 +124,7 @@ const saveTeam = async () => {
         }
         
     }, [data]); 
-
-
-    const getTeams = (data) => {
-        
-        return [...(data || [])].map((d) => {
-            d.date = new Date(d.date);
-
-            return d;
-        });
-    };
-
-  
-
-    const formatDate = (value) => {
-        if (!value) return '';
-        return new Date(value).toLocaleDateString();
-    };
-    const formatCurrency = (value) => {
-        if (value === undefined || value === null) return '';
-        return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-    };
-        
+ 
     const hideDeleteTeamsDialog = () => {
         setDeleteTeamsDialog(false);
     };
@@ -179,14 +153,6 @@ const saveTeam = async () => {
         setDeleteTeamsDialog(true);
     };
     
-
-    const deleteTeam = () => {
-        let _team = teams.filter((val) => val._id !== team._id);
-        setDeleteTeamsDialog(false);
-        setTeam(emptyTeam);
-        toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'Team Deleted', life: 3000 });
-    };
-
     const deleteSelectedTeams = async () => {
         try {
             await Promise.all(selectedTeams.map(t => deleteTeamById(t._id).unwrap()));
@@ -209,17 +175,6 @@ const saveTeam = async () => {
         setFilters(_filters);
         setGlobalFilterValue(value);
     };
-   
-const findIndexById = (id) => {
-    let index = -1;
-    for (let i = 0; i < teams.length; i++) {
-        if (teams[i]._id === id) {
-            index = i;
-            break;
-        }
-    }
-    return index;
-};
 
  const createId = () => {
        let id = '';
@@ -243,14 +198,7 @@ const findIndexById = (id) => {
         );
     };
 
-    const teamBodyTemplate = (rowData) => {
-        return (
-            <div className="flex align-items-center gap-2">
-                <img alt="flag" src="https://primefaces.org/cdn/primereact/images/flag/flag_placeholder.png" className={`flag flag-${rowData.team?.code}`} style={{ width: '24px' }} />
-                <span>{rowData.team?.name}</span>
-            </div>
-        );
-    };
+  
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
@@ -266,16 +214,16 @@ const findIndexById = (id) => {
      };
    
     const membersBodyTemplate = (rowData) => {
-        console.log(`rowData ${rowData.members}`);
-        const members = rowData.members;
+        console.log(`rowData ${rowData?.members}`);
+        const members = rowData?.members;
         if (!Array.isArray(members)) return <span>No members</span>;
 
         return <span>{members.map(member => member.name).join(', ')}</span>;
       };
     
-    const activityBodyTemplate = (rowData) => {
-        return <ProgressBar value={rowData.activity} showValue={false} style={{ height: '6px' }}></ProgressBar>;
-    };
+    // const activityBodyTemplate = (rowData) => {
+    //     return <ProgressBar value={rowData.activity} showValue={false} style={{ height: '6px' }}></ProgressBar>;
+    // };
 
     const activityFilterTemplate = (options) => {
         return (
@@ -288,12 +236,19 @@ const findIndexById = (id) => {
             </>
         );
     };
- const onInputChange = (e, name) => {
-     const val = (e.target && e.target.value) || '';
-     let _team = { ...team };
-     _team[`${name}`] = val;
-     setTeam(_team);
- };
+ const onInputChange = (e,field) => {
+    const value = e.target.value;
+    if (field === 'name') {
+        setTeam((prev) => ({ ...prev, name: value }));
+    } else if (field === 'admin') {
+        setTeam((prev) => ({
+            ...prev,
+            createdBy: { ...prev.createdBy, name: value }
+        }));
+    }
+ }
+    
+
  const deleteTeamDialogFooter = (
         <React.Fragment>
             <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteTeamsDialog} />
@@ -321,46 +276,32 @@ const findIndexById = (id) => {
                 
                 <Column field="members" header="members" sortable filterField="team?.name" style={{ minWidth: '14rem' }} body={membersBodyTemplate} filter filterPlaceholder="Search by name" />
                 <Column field="createdBy.name" header="Admin"  sortable filter filterPlaceholder="Search by admin" style={{ minWidth: '14rem' }}/>
-                <Column field="activity" header="Activity" sortable showFilterMatchModes={false} style={{ minWidth: '12rem' }} body={activityBodyTemplate} filter filterElement={activityFilterTemplate} />
+                {/* <Column field="activity" header="Activity" sortable showFilterMatchModes={false} style={{ minWidth: '12rem' }} body={activityBodyTemplate} filter filterElement={activityFilterTemplate} /> */}
                 <Column headerStyle={{ width: '5rem', textAlign: 'center' }} bodyStyle={{ textAlign: 'center', overflow: 'visible' }} body={actionBodyTemplate} />
             </DataTable>
 
-            <Dialog visible={teamDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Team Details" modal className="p-fluid" footer={teamDialogFooter} onHide={hideDialog}>
-              {team.image && <img src={`https://primefaces.org/cdn/primereact/images/product/${team?.image}`} alt={team?.image} className="team-image block m-auto pb-3" />}
-              <div className="field">
-                  <label htmlFor="name" className="font-bold">
-                      Name
-                  </label>
-                  <InputText id="name" value={team.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !team.name })} />
-                  {submitted && !team.name && <small className="p-error">Name is required.</small>}
-              </div>
-              
-                 
-              
-              <div className="formgrid grid">
-                  <div className="field col">
-                      <label htmlFor="price" className="font-bold">
-                          Price
-                      </label>
-                      {/* <InputNumber id="price" value={product.price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="USD" locale="en-US" /> */}
-                  </div>
-                  
-              </div>
-          </Dialog>
+            <TeamDetails
+            visible={teamDialog}
+            team={team}
+            onInputChange={onInputChange}
+            saveTeam={saveTeam}
+            hideDialog={() => setTeamDialog(false)}
+            submitted={submitted}
+            />
 
-          <Dialog
-    visible={deleteTeamDialog}
-    onHide={() => setDeleteTeamDialog(false)}
-    header="Confirm Delete"
-    footer={
-        <div>
+
+        <Dialog
+        visible={deleteTeamDialog}
+        onHide={() => setDeleteTeamDialog(false)}
+        header="Confirm Delete"
+        footer={
+            <div>
             <Button label="No" icon="pi pi-times" onClick={() => setDeleteTeamDialog(false)} />
             <Button label="Yes" icon="pi pi-check" onClick={deleteConfirmedTeam} />
-        </div>
-    }
->
-    <p>Are you sure you want to delete this team?</p>
-</Dialog>
+            </div>
+        }>
+         <p>Are you sure you want to delete this team?</p>
+        </Dialog>
 
         <Dialog visible={deleteTeamsDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteTeamsDialogFooter} onHide={hideDeleteTeamsDialog}>
             <div className="confirmation-content">

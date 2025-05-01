@@ -5,6 +5,11 @@ const getAllUserTeams=async(req,res)=>{
     try{
     
     const teams = await Team.find().populate('createdBy', 'name').populate('members.userId', 'name').lean()
+    teams.forEach(team => {
+      if (team.createdBy && team.createdBy._id) {
+        team.createdBy._id = team.createdBy._id.toString();
+      }
+    })    
 
     if (!teams || teams.length === 0) {
         return res.status(404).send('No teams found');
@@ -28,23 +33,34 @@ const getTeamById=async(req,res)=>{
     res.status(500).json({ message: 'Server error' });
   }
 }
-
 const createTeam = async (req, res) => {
   try {
-    const { name, createdBy, members } = req.body;
+    console.log("createTeam Request body:", req.body);
 
-    if (!name || !createdBy || !members)
-      return res.status(400).json({ message: "name, createdBy and members are required" });
+    const createTeam = req.body;
+    const members=createTeam.members?createTeam.members:[]
+    
+    const createdBy = new mongoose.Types.ObjectId(req.user.id);
 
-    const createdByObjectId = new mongoose.Types.ObjectId(createdBy);
+    if (!createTeam.name || !createTeam.createdBy)
+      return res.status(400).json({ message: "name, createdBy are required" });
 
-    const memberObjectIds = members.map(user =>({"_id": new mongoose.Types.ObjectId(user._id),
-      "role":user.role??"member"
-    }));
+    const memberObjectIds = Array.isArray(members)
+      ? members.map((user, index) => {
+          if (!user._id || !mongoose.Types.ObjectId.isValid(user._id)) {
+            console.log(`Invalid member ID at index ${index}:`, user._id);
+            throw new Error(`Invalid member ID: ${user._id}`);
+          }
+          return {
+            "_id": new mongoose.Types.ObjectId(user._id),
+            "role": user.role ?? "member"
+          };
+        })
+      : [];
 
     const team = await Team.create({
-      name,
-      createdBy: createdByObjectId,
+      name:createTeam.name,
+      createdBy, 
       members: memberObjectIds
     });
 
@@ -55,6 +71,41 @@ const createTeam = async (req, res) => {
   }
 };
 
+
+// const createTeam = async (req, res) => {
+//   try {
+//     console.log( "createTeam Request body:", req.user);
+
+//     const { name, members } = req.body;
+  
+//     const createdBy = new mongoose.Types.ObjectId(req.user.id);
+
+//     if (!name || !createdBy )
+//       return res.status(400).json({ message: "name, createdBy are required" })
+
+//     const memberObjectIds =Array.isArray(members)?
+//       members.map((user, index) => {
+//       if (!user._id || !mongoose.Types.ObjectId.isValid(user._id)) {
+//         console.log(`Invalid member ID at index ${index}:`, user._id);
+//         throw new Error(`Invalid member ID: ${user._id}`);
+//       }
+//       return{
+//       "_id": new mongoose.Types.ObjectId(user._id),
+//       "role":user.role??"member"
+//     }
+//     }):[]
+//     const team = await Team.create({
+//       name,
+//       createdBy: createdByObjectId,
+//       members: memberObjectIds
+//     });
+
+//     res.json(team);
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ message: 'Failed to create team' });
+//   }
+// };
 
 const editTeam=async(req,res)=>{
     try{
@@ -133,4 +184,12 @@ const removeMemberFromTeam = async (req, res) => {
   
   
 
-module.exports={getAllUserTeams,getTeamById,createTeam,editTeam,deleteTeam,addMemberToTeam,removeMemberFromTeam}
+module.exports={
+  getAllUserTeams,
+  getTeamById,
+  createTeam,
+  editTeam,
+  deleteTeam,
+  addMemberToTeam,
+  removeMemberFromTeam
+}
