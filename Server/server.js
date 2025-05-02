@@ -11,9 +11,9 @@ connectDB()
 
 
 app.use(cors(corsOptions))
-app.use("/api/task", require("./routes/task.rout"))
-app.use("/api/user", require("./routes/user.rout"))
-app.use("/api/team", require("./routes/team.rout"))
+app.use("/api/task", require("./routes/task.route"))
+app.use("/api/user", require("./routes/user.route"))
+app.use("/api/team", require("./routes/team.route"))
 
 app.use(express.json())
 
