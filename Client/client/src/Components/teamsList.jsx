@@ -107,7 +107,7 @@ const saveTeam = async () => {
         return (
             <div className="flex flex-wrap gap-2">
                 <Button label="New" icon="pi pi-plus" severity="success" onClick={openNew} />
-                <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedTeams || !selectedTeams.length} />
+                {/* <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedTeams || !selectedTeams.length} /> */}
             </div>
         );
     };
@@ -176,29 +176,40 @@ const saveTeam = async () => {
         setGlobalFilterValue(value);
     };
 
- const createId = () => {
-       let id = '';
-       let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-   
-       for (let i = 0; i < 5; i++) {
-           id += chars.charAt(Math.floor(Math.random() * chars.length));
-       }
-   
-       return id;
-   };
+    // const renderHeader = () => {
+    //     return (
+    //         <div className="flex flex-wrap gap-2 justify-content-between align-items-center">
+    //            <Toolbar className="mb-4" left={leftToolbarTemplate} ></Toolbar>
+    //             <IconField iconPosition="left">
+    //                 <InputIcon className="pi pi-search" />
+    //                 <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Keyword Search" />
+    //             </IconField>
+    //         </div>
+    //     );
+    // };
+
     const renderHeader = () => {
         return (
-            <div className="flex flex-wrap gap-2 justify-content-between align-items-center">
-                <h4 className="m-0">Teams</h4>
-                <IconField iconPosition="left">
-                    <InputIcon className="pi pi-search" />
-                    <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Keyword Search" />
-                </IconField>
+            <div className="flex flex-wrap justify-between items-center gap-3 p-2 border-round surface-100">
+                <div className="flex gap-2">
+                    {leftToolbarTemplate()}
+                </div>
+    
+                <div className="flex align-items-center">
+                    
+                    <span className="p-input-icon-left">
+                        {/* <i className="pi pi-search" /> */}
+                        <InputText
+                            value={globalFilterValue}
+                            onChange={onGlobalFilterChange}
+                            placeholder="Keyword Search"
+                        />
+                    </span>
+                </div>
             </div>
         );
     };
-
-  
+    
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
@@ -265,16 +276,16 @@ const saveTeam = async () => {
 
     return (
         <div className="card">
-            <Toolbar className="mb-4" left={leftToolbarTemplate} ></Toolbar>
+            
             <DataTable value={teams} paginator header={header} rows={10}
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                     rowsPerPageOptions={[10, 25, 50]} dataKey="_id" selectionMode="checkbox" selection={selectedTeams} onSelectionChange={(e) => setSelectedTeams(e.value)}
                     filters={filters} filterDisplay="menu" globalFilterFields={['name', 'team?.name', 'representative?.name', 'balance', 'status']}
                     emptyMessage="No teams found." currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
-                <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
+                {/* <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column> */}
                 <Column field="name" header="Name" sortable filter filterPlaceholder="Search by name" style={{ minWidth: '14rem' }} />
                 
-                <Column field="members" header="members" sortable filterField="team?.name" style={{ minWidth: '14rem' }} body={membersBodyTemplate} filter filterPlaceholder="Search by name" />
+                <Column field="members" header="members" sortable filterField="team?.name" style={{ minWidth: '14rem' }} body={membersBodyTemplate}  />
                 <Column field="createdBy.name" header="Admin"  sortable filter filterPlaceholder="Search by admin" style={{ minWidth: '14rem' }}/>
                 {/* <Column field="activity" header="Activity" sortable showFilterMatchModes={false} style={{ minWidth: '12rem' }} body={activityBodyTemplate} filter filterElement={activityFilterTemplate} /> */}
                 <Column headerStyle={{ width: '5rem', textAlign: 'center' }} bodyStyle={{ textAlign: 'center', overflow: 'visible' }} body={actionBodyTemplate} />
