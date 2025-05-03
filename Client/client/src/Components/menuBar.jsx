@@ -1,5 +1,5 @@
 import { useDispatch } from 'react-redux';
-import { removeToken } from '../slices/userSlice';
+import { removeToken } from '../slices/authSlice';
 import { useNavigate } from 'react-router';
 import { useSelector } from 'react-redux';
 import { Menubar } from 'primereact/menubar';

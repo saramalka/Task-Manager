@@ -6,7 +6,7 @@ const { isAdmin } = require('../middleware/role.middleware');
 
 router.use(express.json())
 
-router.get("/",teamController.getAllUserTeams)
+router.get("/",verifyToken,teamController.getAllUserTeams)
 router.get("/:id",teamController.getTeamById)
 router.post('/',verifyToken, teamController.createTeam)
 //  verifyToken, isAdmin,

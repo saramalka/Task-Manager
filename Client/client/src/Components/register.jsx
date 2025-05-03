@@ -7,7 +7,7 @@ import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import 'primeflex/primeflex.css';
 import { useDispatch } from 'react-redux';
-import { setToken } from '../slices/userSlice';
+import { setToken } from '../slices/authSlice';
 
 export default function SignUpForm() {
   const [username, setUsername] = React.useState('');

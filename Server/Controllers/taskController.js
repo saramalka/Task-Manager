@@ -90,15 +90,23 @@ const deleteTask=async(req,res)=>{
 
 const updateTaskStatus=async(req,res)=>{
     try{
-        const {id}=req.params
-        const {status}=req.body
-        const task=await Task.findById(id)
+        const {userId}=req.user.id
+        const {taskId,status}=req.params
+        
+
+        const task=await Task.findById(taskId)
         if(!task)
             res.status(404).send('task not found')
-    task.status=status
-    await task.save()
+        const isOwner = task.createdBy.toString() === userId;
+        const isAssigned = task.assignedTo?.some(id => id.toString() === userId);
+
+        if (!isOwner && !isAssigned) {
+            return res.status(403).json({ message: 'Not authorized to update this task' });
+        }
+        task.status=status
+        await task.save()
        
-        res.json('task status updated')
+        res.json('task status updated',task)
     }catch(err){
         res.status(500).json({ message: 'Failed to update status of task' });
     }  

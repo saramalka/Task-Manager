@@ -5,7 +5,7 @@ import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import {useLoginUserMutation}from '../slices/userApiSlice'
 import { useNavigate } from 'react-router-dom';
-import { setToken } from '../slices/userSlice';
+import { setToken } from '../slices/authSlice';
 import { useDispatch } from 'react-redux';
 import 'primeflex/primeflex.css';
 
