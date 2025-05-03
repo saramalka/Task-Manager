@@ -4,7 +4,7 @@ const User=require("../Models/user.model")
 const mongoose=require("mongoose")
 
 const register=async(req,res)=>{
-    const {name,password,email,role}=req.body
+    const {name,password,email,role,teams}=req.body
     if (!name || !password || !email)
           return res.status(404).json({error:true, message:"name,password and email are required"})
     const duplicate = await User.findOne({email}).lean()
@@ -12,7 +12,7 @@ const register=async(req,res)=>{
         return res.status(409).json({message:"Duplicate username"})
     }
     const passwordHash = await bcrypt.hash(password, 10);
-    const user=await User.create({name,password:passwordHash,email,role})
+    const user=await User.create({name,password:passwordHash,email,role,teams})
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
     if (user) { 
@@ -21,7 +21,8 @@ const register=async(req,res)=>{
         user: {
           name: user.name,
           email: user.email,
-          role: user.role
+          role: user.role,
+          teams:user.teams
         }
       });
       
@@ -68,15 +69,20 @@ const apdateUser=async(req,res)=>{
 }
 
 const deleteUser = async (req, res) => {
-    const { _id } = req.body
-    const idObjectId = new mongoose.Types.ObjectId(_id);
-    const user = await User.findById(idObjectId).exec()
+    const { id } = req.body
+
+    try {
+      const user = await User.findById(id).exec()
     if (!user) {
     return res.status(400).json({ message: 'User not found' })
     }
     const result = await user.deleteOne()
-    const reply=`User '${result.name}' deleted`
+    const reply=`User '${user.name}' deleted`
     res.json(reply)
+  } catch (error) {
+      res.status(500).json({ message: 'Failed to delete user', error });
+  }
+    
     }
 
 const getUserByID = async (req, res) => {
@@ -92,7 +98,7 @@ const getUserByID = async (req, res) => {
 
 const login = async (req, res) => {
             try {
-              const { email, password} = req.body;
+              const { email, password,teams} = req.body;
               const user = await User.findOne({ email });
               if (!user) {
                 return res.status(401).json({ message: 'User not found' });

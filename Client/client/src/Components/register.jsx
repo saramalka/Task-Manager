@@ -1,4 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useState ,useEffect} from "react";
+import { MultiSelect } from 'primereact/multiselect';
+import { useGetTeamsQuery } from "../slices/teamApiSlice";
 import { useNavigate } from 'react-router-dom';
 import {useAddUserMutation,useCheckEmailMutation}from '../slices/userApiSlice'
 import { Card } from 'primereact/card';
@@ -9,15 +11,21 @@ import 'primeflex/primeflex.css';
 import { useDispatch } from 'react-redux';
 import { setToken } from '../slices/authSlice';
 
+
 export default function SignUpForm() {
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [role, setRole] = React.useState('member');
+  const [selectedTeams, setSelectedTeams] = useState([]);
+  const { data, isLoading } = useGetTeamsQuery();
   const [addUser,{isError,error,isSuccess}]=useAddUserMutation()
   const [checkEmail] = useCheckEmailMutation()
   const navigate = useNavigate();
   const dispatch=useDispatch()
+  console.log({ data, isLoading });
+      
+  const teams = data ?? [];
 
   useEffect(()=>{
     if(isSuccess)
@@ -36,10 +44,9 @@ export default function SignUpForm() {
   const handleSubmit = async (e) => {
     e.preventDefault(); 
     try {
-      const res = await addUser({ name: username, password, role, email }).unwrap();
-  
+      const res = await addUser({ name: username, password, role, email ,teams}).unwrap();
       if (res?.token) {
-        dispatch(setToken({ token: res.token, name: res.name, role: res.role }));
+        dispatch(setToken({ token: res.token, name: res.user.name, role: res.user.role,teams:res.user.teams }));
       }
   
       console.log('register:', res);
@@ -86,6 +93,11 @@ export default function SignUpForm() {
               onChange={e => setEmail(e.target.value)} 
               onBlur={handleEmailBlur}
             />
+          </div>
+          <div className="p-field">
+            <label htmlFor="password">Teams</label>
+          <MultiSelect value={selectedTeams||[]} onChange={(e) => setSelectedTeams(e.value)} options={teams} optionLabel="name" 
+            placeholder="Select Teams"  className="w-full md:w-20rem" />
           </div>
           <div className="p-field">
             <label htmlFor="password">Password</label>

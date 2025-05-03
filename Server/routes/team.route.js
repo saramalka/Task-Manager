@@ -6,13 +6,13 @@ const { isAdmin } = require('../middleware/role.middleware');
 
 router.use(express.json())
 
-router.get("/",verifyToken,teamController.getAllUserTeams)
+router.get("/",teamController.getAllUserTeams)
 router.get("/:id",teamController.getTeamById)
 router.post('/',verifyToken, teamController.createTeam)
 //  verifyToken, isAdmin,
 router.put("/:id",teamController.editTeam)
 router.delete("/:id",teamController.deleteTeam)
-router.post("/:id/members",verifyToken,isAdmin,teamController.addMemberToTeam)
-router.delete("/:id/members/:userId",verifyToken,isAdmin,teamController.removeMemberFromTeam)
+router.post("/:id/members",verifyToken,isAdmin,verifyToken,isAdmin,teamController.addMemberToTeam)
+router.delete("/:id/members/:userId",teamController.removeMemberFromTeam)
 
 module.exports=router

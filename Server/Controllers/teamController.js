@@ -130,12 +130,12 @@ const editTeam=async(req,res)=>{
 
 const deleteTeam=async(req,res)=>{
     try{
-    const id=req.params
+    const {id}=req.params
     const idObjectId = new mongoose.Types.ObjectId(id);
 
     const team=await Team.findById(idObjectId)
     if(!team)
-        res.status(404).send(`'Team not found'`)
+        return res.status(404).send(`'Team not found'`)
     await Team.findByIdAndDelete(idObjectId);
     res.json({ message: 'Team deleted successfully' });
 }

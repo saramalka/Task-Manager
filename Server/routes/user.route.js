@@ -13,7 +13,7 @@ router.get('/me', verifyToken, userController.getMe);
 router.get("/:id",userController.getUserByID)
 router.post("/",userController.register)
 router.put("/",userController.apdateUser)
-router.delete("/",verifyToken, isAdmin, userController.deleteUser)
+router.delete("/", userController.deleteUser)
 
 
 module.exports=router
