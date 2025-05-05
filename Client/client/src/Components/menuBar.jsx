@@ -20,6 +20,10 @@ export default function Menu() {
             label: 'Dashboard',
             command: () => navigate('/dashboard'),
         },
+        {
+            label: 'My Tasks',
+            command: () => navigate('/tasks'),
+        }
     ];
 
     const adminItems = [
@@ -30,10 +34,6 @@ export default function Menu() {
         {
             label: 'My Teams',
             command: () => navigate('/teams'),
-        },
-        {
-            label: 'Team Tasks',
-            command: () => navigate('/teams/123/tasks'),
         },
         {
             label: 'Task Details',
@@ -52,15 +52,16 @@ export default function Menu() {
 
     if (isUserLoggedIn) {
         if (role === 'admin') {
-            items = [...items, ...adminItems];
-        }
+            items = [...items, ...adminItems]    
+        }else
+        items = [ ...guestItems]
         items.push({
             label: 'Logout',
             icon: 'pi pi-sign-out',
             command: handleLogout,
         });
     } else {
-        items = [...items, ...guestItems];
+        items = [ ...guestItems];
     }
 
     return (

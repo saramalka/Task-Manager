@@ -1,5 +1,5 @@
 import React, { useState ,useEffect} from "react";
-import { MultiSelect } from 'primereact/multiselect';
+import { Dropdown } from 'primereact/dropdown';
 import { useGetTeamsQuery } from "../slices/teamApiSlice";
 import { useNavigate } from 'react-router-dom';
 import {useAddUserMutation,useCheckEmailMutation}from '../slices/userApiSlice'
@@ -17,7 +17,7 @@ export default function SignUpForm() {
   const [password, setPassword] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [role, setRole] = React.useState('member');
-  const [selectedTeams, setSelectedTeams] = useState([]);
+  const [selectedTeam, setSelectedTeam] = useState(null);
   const { data, isLoading } = useGetTeamsQuery();
   const [addUser,{isError,error,isSuccess}]=useAddUserMutation()
   const [checkEmail] = useCheckEmailMutation()
@@ -42,16 +42,20 @@ export default function SignUpForm() {
   };
 
   const handleSubmit = async (e) => {
+    console.log('selectedTeam',selectedTeam);
+    
     e.preventDefault(); 
     try {
-      const res = await addUser({ name: username, password, role, email ,teams}).unwrap();
+      const res = await addUser({ name: username, password, role, email ,teams:selectedTeam?._id}).unwrap();
+      console.log(res);
+      
       if (res?.token) {
         dispatch(setToken({ token: res.token, name: res.user.name, role: res.user.role,teams:res.user.teams }));
       }
   
       console.log('register:', res);
     } catch (err) {
-      console.error('Register failed:', JSON.stringify(err, null, 2));
+      console.log('Register failed:', err);
       alert('Register failed: ' + (err?.data?.message || err?.error || 'Unknown error'));
     }
   }
@@ -95,11 +99,12 @@ export default function SignUpForm() {
             />
           </div>
           <div className="p-field">
-            <label htmlFor="password">Teams</label>
-          <MultiSelect value={selectedTeams||[]} onChange={(e) => setSelectedTeams(e.value)} options={teams} optionLabel="name" 
-            placeholder="Select Teams"  className="w-full md:w-20rem" />
-          </div>
-          <div className="p-field">
+             <label htmlFor="teams">Teams</label>
+             {isLoading ? <p>Loading...</p> : (
+             <Dropdown value={selectedTeam} onChange={(e) => setSelectedTeam(e.value)} options={teams} optionLabel="name" 
+              placeholder="Select a Team" className="w-full md:w-14rem" />)}
+            </div>
+            <div className="p-field">
             <label htmlFor="password">Password</label>
             <Password 
               id="password"

@@ -1,5 +1,6 @@
 const mongoose=require("mongoose")
 const Task=require("../Models/task.model")
+const Team=require("../Models/team.model")
 
 
 const createTask=async(req,res)=>{
@@ -21,13 +22,20 @@ const getAllTasks=async(req,res)=>{
 }
 const getTaskByTeam=async(req,res)=>{
     try{
-    const { id } = req.params;
-    const teamObjectId = new mongoose.Types.ObjectId(id);
-    const task=await Task.find({teamId:teamObjectId})
+    const { id } = req.user.id;
+    const teamId= await Team.findOne({"members.userId":id})
+    if(!teamId)
+        return res.status(404).json({ message: "No team found for user" })
+    const teamObjectId = new mongoose.Types.ObjectId(teamId);
+    const tasks=await Task.find({teamId:teamObjectId})
+    .populate('assignedTo')
+    .populate('teamId')
+    .populate('comments')
+    .populate('createdBy')
 
-    if(!task)
-        res.status(404).send('task not found')
-    res.send(task)
+    if(!tasks)
+        res.status(404).json({ message: "No tasks found for team" })
+    res.send(tasks)
     }catch(err){
         console.log('Error in getTaskByTeam:', err);
         res.status(500).json({ message: 'Server error' });

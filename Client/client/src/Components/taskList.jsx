@@ -4,31 +4,26 @@ import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
-import { IconField } from 'primereact/iconfield';
-import { InputIcon } from 'primereact/inputicon';
 import { Button } from 'primereact/button';
-import { ProgressBar } from 'primereact/progressbar';
 import { Slider } from 'primereact/slider';
-import { Toast } from 'primereact/toast';
-import { Toolbar } from 'primereact/toolbar';
-import {  useDeleteTeamMutation, useGetTeamsQuery ,useEditTeamMutation,useAddTeamMutation} from '../slices/teamApiSlice';
 import getUserIdFromToken from '../getToken'
 import { Dialog } from 'primereact/dialog';
 import TaskDetails from './taskDetails';
+import { useCreateTaskMutation, useDeleteTaskMutation, useGetTasksQuery, useUpdateTaskMutation } from '../slices/taskApiSlice';
 
-export default function TeamsTasks() {
+export default function TaskList() {
     const [task, setTask] = useState([]);
     const [tasks, setTasks] = useState([]);
-    const {data}=useGetTeamsQuery()
+    const {data}=useGetTasksQuery()
     const [selectedTask, setSelectedTask] = useState([]);
     const [deleteTaskDialog, setDeleteTaskDialog] = useState(false);
-    const [editTaskById] = useEditTeamMutation();
-    const [addTask]=useAddTeamMutation()
-    const[deleteTaskById]=useDeleteTeamMutation()
+    const [editTaskById] = useUpdateTaskMutation();
+    const [addTask]=useCreateTaskMutation()
+    const[deleteTaskById]=useDeleteTaskMutation()
     const toast = useRef(null)
    
     let emptyTask={
-        name:'new Task',
+        title:'new Task',
         createdBy:"68062f23c50312e341e8bf72"
     }
     
@@ -56,7 +51,7 @@ export default function TeamsTasks() {
 const saveTask = async () => {
     setSubmitted(true);
     console.log('task being:', task);
-    if (!task.name.trim()) return;
+    if (!task.title.trim()) return;
 
     const createdBy = getUserIdFromToken();
 
@@ -93,8 +88,8 @@ const saveTask = async () => {
     //const [task, setTask] = useState(emptyTask);
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        'task.name': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        title: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        'task.title': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
         representative: { value: null, matchMode: FilterMatchMode.IN },
         date: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] },
         balance: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
@@ -276,10 +271,11 @@ const saveTask = async () => {
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                     filters={filters} filterDisplay="menu" globalFilterFields={['name', 'task?.name', 'representative?.name', 'balance', 'status']}
                     emptyMessage="No Task found." currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
-                <Column field="name" header="Name" sortable filter filterPlaceholder="Search by name" style={{ minWidth: '14rem' }} />
-                
-                <Column field="members" header="members" sortable filterField="task?.name" style={{ minWidth: '14rem' }} body={membersBodyTemplate}  />
-                <Column field="createdBy.name" header="Admin"  sortable filter filterPlaceholder="Search by admin" style={{ minWidth: '14rem' }}/>
+                <Column field="title" header="Title" sortable filterField="task?.title" filterPlaceholder="Search by title" style={{ minWidth: '14rem' }} />
+                <Column field="status" header="Status" sortable filterField="task?.status" style={{ minWidth: '14rem' }}   />
+                {/* body={membersBodyTemplate} */}
+                <Column field="team" header="Team" sortable filterField="task?.teamId.name" style={{ minWidth: '14rem' }}   />
+                <Column field="assignedTo.name" header="assigned To"  sortable filter filterPlaceholder="Search by assigned To" style={{ minWidth: '14rem' }}/>
                 {/* <Column field="activity" header="Activity" sortable showFilterMatchModes={false} style={{ minWidth: '12rem' }} body={activityBodyTemplate} filter filterElement={activityFilterTemplate} /> */}
                 <Column headerStyle={{ width: '5rem', textAlign: 'center' }} bodyStyle={{ textAlign: 'center', overflow: 'visible' }} body={actionBodyTemplate} />
             </DataTable>

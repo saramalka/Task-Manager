@@ -1,5 +1,4 @@
-import React , { useState } from "react";
-import { Dropdown } from 'primereact/dropdown';
+import React from "react";
 import { Card } from 'primereact/card';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
@@ -9,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { setToken } from '../slices/authSlice';
 import { useDispatch } from 'react-redux';
 import 'primeflex/primeflex.css';
-import { useGetTeamsQuery } from '../slices/teamApiSlice';
+
 
 export default function LoginForm() {
   const navigate = useNavigate();
@@ -18,9 +17,8 @@ export default function LoginForm() {
   const [username, setUsername] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const {data}= useGetTeamsQuery()
-  const teams = data||[]
+
+
     const handleSubmit = async (e) => {
       e.preventDefault();
       try {
@@ -72,11 +70,7 @@ export default function LoginForm() {
               onChange={e => setPassword(e.target.value)}
             />
           </div>
-          <div className="p-field">
-            <label htmlFor="team">Log in for team</label>
-            <Dropdown value={selectedTeam} onChange={(e) => setSelectedTeam(e.value)} options={teams} optionLabel="name" 
-                placeholder="Select a Team" className="w-full md:w-14rem" />
-          </div>
+          
           <Button label="Log In" icon="pi pi-sign-in" type="submit" className="p-mt-2" />
         </form>
       </Card>}

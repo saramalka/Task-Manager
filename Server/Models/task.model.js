@@ -7,8 +7,8 @@ const TaskSchema=new mongoose.Schema({
     },
     status: {
          type: String,
-         enum: ['complete', 'active', 'resolve','new'],
-        default: 'new'
+         enum: ['Complete', 'Active', 'Resolve','New','Bag'],
+        default: 'New'
         },
     priority: {
         type: String,

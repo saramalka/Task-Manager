@@ -5,10 +5,10 @@ const { verifyToken } = require("../middleware/verifyToken.middlware")
 
 router.use(express.json())
 
-router.get("/",taskController.getAllTasks)
+//router.get("/",taskController.getAllTasks)
 
 
-router.get("/:id",taskController.getTaskByTeam)
+router.get("/",verifyToken,taskController.getTaskByTeam)
 router.get("./taskId",taskController.getTaskById)
 router.post("/", taskController.createTask)
 router.put("/:id",taskController.editTask)
