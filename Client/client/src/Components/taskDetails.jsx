@@ -41,9 +41,9 @@ const TaskDetails = ({ visible, task, onInputChange, saveTask, hideDialog, submi
                 id="assignedTo"
                 value={task?.assignTo?.name|| ''}
                 onChange={(e) => onInputChange(e, 'assignedTo')}
-                 className={submitted && !task?.assignTo?.name ? 'p-invalid' : ''}
+                className={submitted && !task?.assignTo?.name ? 'p-invalid' : ''}
             />
-           {submitted && !task?.createdBy?.name && <small className="p-error">creator name is required.</small>}
+          
             <Dropdown value={selectedStatus} onChange={(e) => setSelectedStatus(e.value)} options={statuses} 
               placeholder="Select a Status" className="w-full md:w-14rem" />
             </div>

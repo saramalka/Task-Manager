@@ -54,7 +54,7 @@ export default function Menu() {
         if (role === 'admin') {
             items = [...items, ...adminItems]    
         }else
-        items = [ ...guestItems]
+        items = [ ...items,...guestItems]
         items.push({
             label: 'Logout',
             icon: 'pi pi-sign-out',

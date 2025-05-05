@@ -67,12 +67,12 @@ const saveTask = async () => {
         if (_task._id) {
             await editTaskToDB(_task); 
             const updatedTask = tasks.map(t => t._id === _task._id ? _task : t);
-            setTask(updatedTask);
+            setTasks(updatedTask);
             toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'Task Updated', life: 3000 });
         } else {
             
             const res = await addTaskToDB(_task); 
-            setTask([...tasks, res.data]); 
+            setTasks([...tasks, res.data]) 
             toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'Task Created', life: 3000 });
         }
 
@@ -113,9 +113,9 @@ const saveTask = async () => {
     };
     useEffect(() => {
         if (Array.isArray(data)) {
-            setTask(data);
+            setTasks(data);
         } else {
-            setTask([]); 
+            setTasks([]); 
         }
         
     }, [data]); 
@@ -244,12 +244,12 @@ const saveTask = async () => {
     };
  const onInputChange = (e,field) => {
     const value = e.target.value;
-    if (field === 'name') {
-        setTask((prev) => ({ ...prev, name: value }));
-    } else if (field === 'admin') {
+    if (field === 'title') {
+        setTask((prev) => ({ ...prev, title: value }));
+    } else if (field === 'assignedTo') {
         setTask((prev) => ({
             ...prev,
-            createdBy: { ...prev.createdBy, name: value }
+            createdBy: { ...prev.assignedTo, name: value }
         }));
     }
  }
@@ -274,7 +274,7 @@ const saveTask = async () => {
                 <Column field="title" header="Title" sortable filterField="task?.title" filterPlaceholder="Search by title" style={{ minWidth: '14rem' }} />
                 <Column field="status" header="Status" sortable filterField="task?.status" style={{ minWidth: '14rem' }}   />
                 {/* body={membersBodyTemplate} */}
-                <Column field="team" header="Team" sortable filterField="task?.teamId.name" style={{ minWidth: '14rem' }}   />
+                <Column field="teamId.name" header="Team" sortable filterField="task.teamId.name" style={{ minWidth: '14rem' }}   />
                 <Column field="assignedTo.name" header="assigned To"  sortable filter filterPlaceholder="Search by assigned To" style={{ minWidth: '14rem' }}/>
                 {/* <Column field="activity" header="Activity" sortable showFilterMatchModes={false} style={{ minWidth: '12rem' }} body={activityBodyTemplate} filter filterElement={activityFilterTemplate} /> */}
                 <Column headerStyle={{ width: '5rem', textAlign: 'center' }} bodyStyle={{ textAlign: 'center', overflow: 'visible' }} body={actionBodyTemplate} />

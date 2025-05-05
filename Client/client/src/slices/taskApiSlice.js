@@ -18,7 +18,7 @@ const taskApiSlice=apiSlice.injectEndpoints({
         }),
         updateTask:build.mutation({
             query:(task)=>({
-                url:"/api/task",
+                url:`/api/task/${task._id}`,
                 method:"PUT",
                 body:task
             }),
@@ -26,7 +26,7 @@ const taskApiSlice=apiSlice.injectEndpoints({
         }),
         deleteTask:build.mutation({
             query:(task)=>({
-                url:"/api/task",
+                url:`/api/task/${task._id}`,
                 method:"DELETE",
                 body:task
             }),
