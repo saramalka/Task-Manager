@@ -13,7 +13,7 @@ const register=async(req,res)=>{
     }
     const passwordHash = await bcrypt.hash(password, 10);
     const user=await User.create({name,password:passwordHash,email,role,teams})
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET);
 
     if (user) { 
       return res.status(200).json({
@@ -38,8 +38,7 @@ const register=async(req,res)=>{
 
 const getAllUsers= async (req, res) => {
     try{
-    const users = await User.find().lean()
-   
+      const users = await User.find().select('-password').lean();
     if (!users?.length) {
          return res.status(400).json({ message: 'No users found' })
     }
@@ -59,10 +58,14 @@ const apdateUser=async(req,res)=>{
         res.status(400).json('user is not exist')
 
     user.name=name
-    user.password=password
     user.email=email
     user.teams=teams
     user.role=role
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+  }
+  
 
     const apdateUser= await user.save()
     res.json(`${apdateUser} updated`)
@@ -109,7 +112,9 @@ const login = async (req, res) => {
                 return res.status(401).json({ message: 'Invalid credentials' });
               }
           
-              const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+
+              const token = jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET);
+
               res.status(200).json({ user, token });
           
             } catch (err) {
@@ -132,6 +137,7 @@ const checkEmail=async(req, res) => {
           
     const getMe = async (req, res) => {
         const user = await User.findById(req.userId).select('-password');
+        if (!req.userId) return res.status(401).json({ message: 'Unauthorized' });
         res.json(user);
       };
 module.exports={getAllUsers,apdateUser,deleteUser,getUserByID,login,getMe,register,checkEmail}

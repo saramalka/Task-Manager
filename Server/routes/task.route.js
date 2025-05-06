@@ -8,7 +8,7 @@ router.use(express.json())
 //router.get("/",taskController.getAllTasks)
 
 
-router.get("/",verifyToken,taskController.getTaskByTeam)
+router.get("/",verifyToken,taskController.getTaskAndUsersByTeam)
 router.get("./taskId",taskController.getTaskById)
 router.post("/", taskController.createTask)
 router.put("/:id",taskController.editTask)

@@ -1,13 +1,13 @@
 const mongoose=require("mongoose")
 const Task=require("../Models/task.model")
 const Team=require("../Models/team.model")
-
+const User=require("../Models/user.model")
 
 const createTask=async(req,res)=>{
     const { title, teamId,status,priority,assignedTo,createdBy,comments } = req.body;
     try{
         if(!title|!teamId)
-            res.status(404).send('title, teamId are required')
+            return res.status(404).send('title, teamId are required')
         const task=await Task.create({title, teamId,status,priority,assignedTo,createdBy,comments})
         return res.send(task)
     }catch(err){
@@ -15,33 +15,67 @@ const createTask=async(req,res)=>{
     }
 }
 const getAllTasks=async(req,res)=>{
-    const task=await Task.find()
-    if(!task)
-        res.status(404).send('task not found')
-    res.send(task)
+    try {
+        const tasks = await Task.find(); 
+        res.status(200).send(tasks); 
+      } catch (err) {
+        console.error('Error fetching tasks:', err);
+        res.status(500).send('Server error');
+      }
+    
 }
-const getTaskByTeam=async(req,res)=>{
-    try{
-    const  id  = req.user.id;
+const getTaskAndUsersByTeam = async (req, res) => {
+    try {
+        
+        const id = req.user.id;
+        const teamId = await Team.findOne({ "members._id": id });
 
-    const teamId= await Team.findOne({"members._id":id})
-    if(!teamId)
-        return res.status(404).json({ message: "No team found for user" })
-   
-    const tasks=await Task.find({ teamId: teamId._id })
-    .populate('assignedTo')
-    .populate('teamId')
-    // .populate('comments')
-    .populate('createdBy')
+        if (!teamId)
+            return res.status(404).json({ message: "No team found for user" });
+        const user = await User.findById(new mongoose.Types.ObjectId(id));
+     
+        if (user) {
+            if (!user.teams) user.teams = [];
+            user.teams.push(teamId._id);
+            await user.save();
+        } else {
+            console.log('user not found');
+        }
 
-    if(!tasks)
-        return res.status(404).json({ message: "No tasks found for team" })
-    res.send(tasks)
-    }catch(err){
+        const users = await User.find({ teams: teamId._id });
+        const tasks = await Task.find({ teamId: teamId._id })
+            .populate('assignedTo')
+            .populate('teamId')
+            .populate('createdBy');
+
+        res.status(200).send({ tasks, users });
+    } catch (err) {
         console.log('Error in getTaskByTeam:', err);
         res.status(500).json({ message: 'Server error' });
     }
 }
+
+
+// const c=async(req,res)=>{
+//     try{
+//     const  id  = req.user.id;
+
+//     const teamId = await Team.findOne({ "members._id": new mongoose.Types.ObjectId(id) });
+
+
+//     if(!teamId)
+//         return res.status(404).json({ message: "No team found for user" })
+   
+//     const users=await Task.find({ teamId: teamId._id })
+//     .populate('userId')
+    
+
+//     res.status(200).send(users)
+//     }catch(err){
+//         console.log('Error in getUsersByTeam:', err);
+//         res.status(500).json({ message: 'Server error' });
+//     }
+// }
 
 const getTaskById=async(req,res)=>{
     
@@ -122,4 +156,4 @@ const updateTaskStatus=async(req,res)=>{
     
 }
 
-module.exports={createTask,getTaskByTeam,getTaskById,editTask,deleteTask,updateTaskStatus}
+module.exports={createTask,getTaskAndUsersByTeam,getTaskById,editTask,deleteTask,updateTaskStatus}

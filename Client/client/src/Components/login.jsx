@@ -1,8 +1,6 @@
-import React, { useState ,useEffect} from "react";
-import { Dropdown } from 'primereact/dropdown';
-import { useGetTeamsQuery } from "../slices/teamApiSlice";
+import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import {useAddUserMutation,useLoginUserMutation}from '../slices/userApiSlice'
+import {useLoginUserMutation}from '../slices/userApiSlice'
 import { Card } from 'primereact/card';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
@@ -17,12 +15,11 @@ export default function LoginForm() {
   const navigate = useNavigate();
   const dispatch=useDispatch()
   const [onLogin,{isLoading}]=useLoginUserMutation()
-  const [username, setUsername] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [visible, setVisible] = useState(false);
 
-  //  useEffect(()=>{
+
   //    if(isSuccess)
   //      navigate('/dashboard')
   //  },[isSuccess])
@@ -78,6 +75,7 @@ export default function LoginForm() {
                value={password}
                onChange={e => setPassword(e.target.value)}
                toggleMask
+              feedback={false}
              />
            </div> 
            <div className="flex gap-2 mt-3">

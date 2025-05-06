@@ -14,6 +14,7 @@ import { useCreateTaskMutation, useDeleteTaskMutation, useGetTasksQuery, useUpda
 export default function TaskList() {
     const [task, setTask] = useState([]);
     const [tasks, setTasks] = useState([]);
+    const [users, setUsers] = useState([]);
     const {data}=useGetTasksQuery()
     const [selectedTask, setSelectedTask] = useState([]);
     const [deleteTaskDialog, setDeleteTaskDialog] = useState(false);
@@ -21,6 +22,8 @@ export default function TaskList() {
     const [addTask]=useCreateTaskMutation()
     const[deleteTaskById]=useDeleteTaskMutation()
     const toast = useRef(null)
+    console.log(data);
+    
    
     let emptyTask={
         title:'new Task',
@@ -54,11 +57,11 @@ const saveTask = async () => {
     if (!task.title.trim()) return;
 
     const createdBy = getUserIdFromToken();
-
   
   if (!createdBy) {
     console.log("User is not logged in.");
-  }else   console.log(`createdBy ${createdBy}`);
+  }else 
+    console.log(`createdBy ${createdBy}`);
 
     let _task = { ...task,createdBy:createdBy };
     console.log('task being sent:', _task);
@@ -66,13 +69,15 @@ const saveTask = async () => {
     try {
         if (_task._id) {
             await editTaskToDB(_task); 
+            console.log('set');
+            
             const updatedTask = tasks.map(t => t._id === _task._id ? _task : t);
             setTasks(updatedTask);
             toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'Task Updated', life: 3000 });
         } else {
-            
+            console.log('save');
             const res = await addTaskToDB(_task); 
-            setTasks([...tasks, res.data]) 
+            setTasks([...tasks, res]) 
             toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'Task Created', life: 3000 });
         }
 
@@ -112,10 +117,14 @@ const saveTask = async () => {
         setTaskDialog(true);
     };
     useEffect(() => {
-        if (Array.isArray(data)) {
-            setTasks(data);
+        if (data ) {
+            if(Array.isArray(data.tasks))
+                setTasks(data.tasks);
+            if(Array.isArray(data.users))
+                setUsers(data.users);
         } else {
             setTasks([]); 
+            setUsers([])
         }
         
     }, [data]); 
@@ -171,18 +180,6 @@ const saveTask = async () => {
         setGlobalFilterValue(value);
     };
 
-    // const renderHeader = () => {
-    //     return (
-    //         <div className="flex flex-wrap gap-2 justify-content-between align-items-center">
-    //            <Toolbar className="mb-4" left={leftToolbarTemplate} ></Toolbar>
-    //             <IconField iconPosition="left">
-    //                 <InputIcon className="pi pi-search" />
-    //                 <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Keyword Search" />
-    //             </IconField>
-    //         </div>
-    //     );
-    // };
-
     const renderHeader = () => {
         return (
             <div className="flex flex-wrap justify-between items-center gap-3 p-2 border-round surface-100">
@@ -227,21 +224,7 @@ const saveTask = async () => {
         return <span>{members.map(member => member.name).join(', ')}</span>;
       };
     
-    // const activityBodyTemplate = (rowData) => {
-    //     return <ProgressBar value={rowData.activity} showValue={false} style={{ height: '6px' }}></ProgressBar>;
-    // };
 
-    const activityFilterTemplate = (options) => {
-        return (
-            <>
-                <Slider value={options.value} onChange={(e) => options.filterCallback(e.value)} range className="m-3"></Slider>
-                <div className="flex align-items-center justify-content-between px-2">
-                    <span>{options.value ? options.value[0] : 0}</span>
-                    <span>{options.value ? options.value[1] : 100}</span>
-                </div>
-            </>
-        );
-    };
  const onInputChange = (e,field) => {
     const value = e.target.value;
     if (field === 'title') {
@@ -249,9 +232,13 @@ const saveTask = async () => {
     } else if (field === 'assignedTo') {
         setTask((prev) => ({
             ...prev,
-            createdBy: { ...prev.assignedTo, name: value }
+            assignedTo: value 
         }));
     }
+    else if (field === 'status') {
+        setTask((prev) => ({ ...prev, status: value }));
+    }
+    
  }
     
 
@@ -283,6 +270,7 @@ const saveTask = async () => {
             <TaskDetails
             visible={taskDialog}
             task={task}
+            users={users}
             onInputChange={onInputChange}
             saveTask={saveTask}
             hideDialog={() => setTaskDialog(false)}

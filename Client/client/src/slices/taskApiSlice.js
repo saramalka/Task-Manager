@@ -4,7 +4,10 @@ const taskApiSlice=apiSlice.injectEndpoints({
     endpoints:(build)=>({
         getTasks:build.query({
             query:()=>({
-                url:"/api/task"
+                url:"/api/task",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}` 
+                  }
             }),
             providesTags:["Tasks"]
         }),

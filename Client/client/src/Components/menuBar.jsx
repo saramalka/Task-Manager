@@ -15,10 +15,18 @@ export default function Menu() {
         navigate('/'); 
     };
 
-    const commonItems = [
+    let items = [
+        {
+            label: 'Profile',
+            command: () => navigate('/profile'),
+        },
+        {
+            label: 'Home',
+            command: () => navigate('/'),
+        },
         {
             label: 'Dashboard',
-            command: () => navigate('/'),
+            command: () => navigate('/dashboard'),
         },
         {
             label: 'My Tasks',
@@ -27,35 +35,24 @@ export default function Menu() {
     ];
 
     const adminItems = [
-        {
-            label: 'Profile',
-            command: () => navigate('/profile'),
-        },
+        
         {
             label: 'My Teams',
             command: () => navigate('/teams'),
         },
-        {
-            label: 'Task Details',
-            command: () => navigate('/api/tasks/456'),
-        },
+        // {
+        //     label: 'Task Details',
+        //     command: () => navigate('/api/tasks/456'),
+        // },
     ];
 
-    // const guestItems = [
-    //     {
-    //         label: 'Register',
-    //         command: () => navigate('/register'),
-    //     },
-    // ];
-
-    let items = [...commonItems];
+    
 
     if (isUserLoggedIn) {
         if (role === 'admin') {
             items = [...items, ...adminItems]    
-        }else
-        items = [ ...items]
-        // ,...guestItems
+        }
+        
         items.push({
             label: 'Logout',
             icon: 'pi pi-sign-out',

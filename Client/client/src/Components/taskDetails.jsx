@@ -5,9 +5,9 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 
 
-const TaskDetails = ({ visible, task, onInputChange, saveTask, hideDialog, submitted }) => {
-    const [selectedStatus, setSelectedStatus] = useState(null)
-    const statuses=["New","Resolve","Bag","Close"]
+const TaskDetails = ({ visible, task, onInputChange, saveTask, hideDialog, submitted,users }) => {
+   
+    const statuses=["New","Active","Resolve","Bag","Close"]
 
     return (
         <Dialog
@@ -36,16 +36,23 @@ const TaskDetails = ({ visible, task, onInputChange, saveTask, hideDialog, submi
             />
             {submitted && !task?.title && <small className="p-error">Title is required.</small>}
 
-            <label htmlFor="assignedTo">Assign to</label>
-            <InputText
+            <label htmlFor="assignedTo">Assign To</label>
+            <Dropdown
                 id="assignedTo"
-                value={task?.assignTo?.name|| ''}
-                onChange={(e) => onInputChange(e, 'assignedTo')}
-                className={submitted && !task?.assignTo?.name ? 'p-invalid' : ''}
+                value={task?.assignedTo || ''} 
+                onChange={(e) => onInputChange({ target: { value: e.value } }, 'assignedTo')}
+                options={users}
+                optionLabel="name"
+                optionValue="_id"
+                placeholder="Select a user"
+                className="w-full"
             />
-          
-            <Dropdown value={selectedStatus} onChange={(e) => setSelectedStatus(e.value)} options={statuses} 
-              placeholder="Select a Status" className="w-full md:w-14rem" />
+
+           <label htmlFor="status">Status</label>
+            <Dropdown value={task?.status|| ''}
+             onChange={(e) => onInputChange({ target: { value: e.value } }, 'status')}
+             options={statuses} 
+             placeholder="Select a Status" className="w-full md:w-14rem" />
             </div>
         </Dialog>
     );

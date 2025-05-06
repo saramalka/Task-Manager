@@ -28,7 +28,7 @@ const AppRoutes = () => {
       <Route path="/" element={<Homepage />} />
       <Route path="/teams" element={<TeamsList />} />
       <Route path="/tasks" element={<TaskList />} />
-      <Route path="tasks/:taskId" element={<TaskDetails />} />
+      {/* <Route path="tasks/:taskId" element={<TaskDetails />} /> */}
       <Route path="profile" element={<Profile />} />
   
     </Routes>
