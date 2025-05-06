@@ -5,18 +5,17 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';                             
 import 'primeflex/primeflex.css';     
 import AppRoutes from "./routes";                         
-import SignUpForm from './Components/register';
 import Menu from './Components/menuBar';
 import { BrowserRouter } from "react-router-dom";
+import Dashboard from './Components/dashboard';
 
 function App() {
   return (
     <>
 
     <BrowserRouter >
-    <Menu/>
-    <AppRoutes />
-    
+      <Menu/>
+      <AppRoutes />
     </BrowserRouter>
     </>
   );

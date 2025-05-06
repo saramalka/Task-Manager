@@ -2,7 +2,7 @@ import React, { useState ,useEffect} from "react";
 import { Dropdown } from 'primereact/dropdown';
 import { useGetTeamsQuery } from "../slices/teamApiSlice";
 import { useNavigate } from 'react-router-dom';
-import {useAddUserMutation,useLoginUserMutation}from '../slices/userApiSlice'
+import {useAddUserMutation,useCheckEmailMutation}from '../slices/userApiSlice'
 import { Card } from 'primereact/card';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
@@ -21,20 +21,23 @@ export default function LoginForm() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [visible, setVisible] = useState(false);
-
-  //  useEffect(()=>{
-  //    if(isSuccess)
-  //      navigate('/dashboard')
-  //  },[isSuccess])
+   console.log({ data, isLoading });
+       
+   const teams = data ?? [];
  
-  //  const handleEmailBlur = async () => {
-  //    try {
-  //      const res = await checkEmail(email).unwrap();
-  //      console.log('Email available:', res.message);
-  //    } catch (err) {
-  //      alert('Email already exists');
-  //    }
-  //  };
+   useEffect(()=>{
+     if(isSuccess)
+       navigate('/dashboard')
+   },[isSuccess])
+ 
+   const handleEmailBlur = async () => {
+     try {
+       const res = await checkEmail(email).unwrap();
+       console.log('Email available:', res.message);
+     } catch (err) {
+       alert('Email already exists');
+     }
+   };
  
   const handleSubmit = async (e) => {
         e.preventDefault();

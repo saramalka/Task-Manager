@@ -10,6 +10,7 @@ import { Button } from 'primereact/button';
 import 'primeflex/primeflex.css';
 import { useDispatch } from 'react-redux';
 import { setToken } from '../slices/authSlice';
+import '../SignUpForm.css'
 
 
 export default function SignUpForm() {
@@ -59,7 +60,6 @@ export default function SignUpForm() {
       alert('Register failed: ' + (err?.data?.message || err?.error || 'Unknown error'));
     }
   }
-  
 
 
   const handleGoToLogin = () => {
@@ -69,8 +69,10 @@ export default function SignUpForm() {
   };
 
   return (
-    <div className="p-d-flex p-jc-center p-ai-center" style={{ height: '100vh' }}>
-      <Card title="SignUp" style={{ width: '24rem' }}>
+        <div className="signup-page"> 
+   <div className="signup-card"> 
+  <Card>
+    <h2>הרשמה למערכת</h2>
         <form onSubmit={handleSubmit} className="p-fluid">
           <div className="p-field">
             <label htmlFor="username">Username</label>
@@ -112,11 +114,12 @@ export default function SignUpForm() {
               onChange={e => setPassword(e.target.value)}
             />
           </div>
-          <Button label="Sign Up" icon="pi pi-sign-up" type="submit" className="p-mt-2" />
-          <div>existing user?</div>
-          <Button label="Log In"  onClick={handleGoToLogin} type="button" className="p-mt-2" />
-        </form>
-      </Card>
-    </div>
+          <Button label="הירשם" icon="pi pi-sign-up" type="submit" className="p-mt-2" />
+          <div>רשום כבר?</div>
+          <Button label="התחבר"  onClick={handleGoToLogin} type="button" className="p-mt-2" />
+        </form></Card>
+      </div>
+      
+     </div> 
   );
 }

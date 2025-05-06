@@ -12,13 +12,13 @@ export default function Menu() {
 
     const handleLogout = () => {
         dispatch(removeToken());
-        navigate('/dashboard'); 
+        navigate('/'); 
     };
 
     const commonItems = [
         {
             label: 'Dashboard',
-            command: () => navigate('/dashboard'),
+            command: () => navigate('/'),
         },
         {
             label: 'My Tasks',
@@ -41,12 +41,12 @@ export default function Menu() {
         },
     ];
 
-    const guestItems = [
-        {
-            label: 'Register',
-            command: () => navigate('/register'),
-        },
-    ];
+    // const guestItems = [
+    //     {
+    //         label: 'Register',
+    //         command: () => navigate('/register'),
+    //     },
+    // ];
 
     let items = [...commonItems];
 
@@ -54,14 +54,15 @@ export default function Menu() {
         if (role === 'admin') {
             items = [...items, ...adminItems]    
         }else
-        items = [ ...items,...guestItems]
+        items = [ ...items]
+        // ,...guestItems
         items.push({
             label: 'Logout',
             icon: 'pi pi-sign-out',
             command: handleLogout,
         });
     } else {
-        items = [ ...guestItems];
+        items=[]
     }
 
     return (
