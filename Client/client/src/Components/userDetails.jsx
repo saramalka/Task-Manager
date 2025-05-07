@@ -5,8 +5,8 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 
 
-const UserDetails = ({ visible, user,teams, onInputChange, saveUser, hideDialog, submitted,users }) => {
-    console.log(user);
+const UserDetails = ({ visible, user,teams, onInputChange, saveUser, hideDialog, submitted }) => {
+    console.log(teams);
     
     return (
         <Dialog
@@ -34,18 +34,38 @@ const UserDetails = ({ visible, user,teams, onInputChange, saveUser, hideDialog,
                 className={submitted && !user?.name ? 'p-invalid' : ''}
             />
             {submitted && !user?.name && <small className="p-error">Name is required.</small>}
+          
+                <label htmlFor="email">Mail</label>
+                <InputText
+                id="email"
+                value={user?.email || ''}
+                onChange={(e) => onInputChange(e, 'email')}
+                required
+                autoFocus
+                className={submitted && !user?.email ? 'p-invalid' : ''}
+            />
+            {submitted && !user?.email && <small className="p-error">Mail is required.</small>}
+
+            <label htmlFor="role">Role</label>
+                <InputText
+                id="email"
+                value={user?.role || ''}
+                onChange={(e) => onInputChange(e, 'role')}
+                autoFocus
+                className={submitted && !user?.role ? 'p-invalid' : ''}
+            />
 
             <label htmlFor="assignedTo">Team</label>
             <Dropdown
-    id="teams"
-    value={teams?.name || ''}
-    onChange={(e) =>
-        onInputChange({ target: { value: [e.value] } }, 'teams')
-    }
-    options={teams?.map(u => ({ label: u.name, value: u._id })) || []}
-    placeholder="Select a team"
-    className="w-full"
-/>
+            id="teams"
+            value={user?.teams?.[0]?._id || ''}
+            onChange={(e) =>
+                onInputChange({ target: { value: [e.value] } }, 'teams')
+            }
+            options={teams?.map(u => ({ label: u.name, value: u._id })) || []}
+            placeholder="Select a team"
+            className="w-full"
+            />
 
             </div> 
         </Dialog>

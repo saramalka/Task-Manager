@@ -5,8 +5,6 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
-import { Slider } from 'primereact/slider';
-import getUserIdFromToken from '../getToken'
 import { Dialog } from 'primereact/dialog';
 import UserDetails from './userDetails';
 import { useAddUserMutation, useDeleteUserMutation, useGetUsersQuery, useEditUserMutation } from '../slices/userApiSlice';
@@ -214,14 +212,11 @@ const saveUser = async () => {
     const value = e.target.value;
     if (field === 'name') {
         setUser((prev) => ({ ...prev, name: value }));
-    } else if (field === 'assignedTo') {
-        setUser((prev) => ({
-            ...prev,
-            assignedTo: value 
-        }));
+    } else if (field === 'role') {
+        setUser((prev) => ({ ...prev, role: value }));
     }
-    else if (field === 'status') {
-        setUser((prev) => ({ ...prev, status: value }));
+    else if (field === 'email') {
+        setUser((prev) => ({ ...prev, email: value }));
     }
     else if (field === 'teams') {
     setUser({ ...user, teams: value })

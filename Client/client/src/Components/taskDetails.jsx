@@ -47,6 +47,18 @@ const TaskDetails = ({ visible, task, onInputChange, saveTask, hideDialog, submi
                 placeholder="Select a user"
                 className="w-full"
             />
+            <label htmlFor="teamId">Team</label>
+            {/* <Dropdown
+            id="teamId"
+            value={teamId?._id || ''}
+            onChange={(e) =>
+              onInputChange({ target: { value: [e.value] } }, 'teamId')
+            }
+            options={teams?.map(u => ({ label: u.name, value: u._id })) || []}
+            placeholder="Select a team"
+            className="w-full"
+            /> */}
+
 
            <label htmlFor="status">Status</label>
             <Dropdown value={task?.status|| ''}

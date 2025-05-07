@@ -3,19 +3,19 @@ import apiSlice from "./apiSlice";
 
 const userApiSlice=apiSlice.injectEndpoints({
     endpoints:(build)=>({
-        getUsers:build.query({
+      getUsers:build.query({
             query:()=>({
                 url:"/api/user"
             }),
             providesTags:["Users"]
         }),
-        getUserById:build.query({
+      getUserById:build.query({
             query:(id)=>({
                 url:`/api/user/${id}`
             }),
             
         }),
-       addUser:build.mutation({
+      addUser:build.mutation({
           query:(user)=>({
             url:'/api/user',
             method:'POST',
@@ -23,7 +23,7 @@ const userApiSlice=apiSlice.injectEndpoints({
           }),
           invalidatesTags:["Users"]
        }),
-       loginUser: build.mutation({
+      loginUser: build.mutation({
         query: (user) => ({
           url: '/api/user/login',
           method: 'POST',
@@ -37,7 +37,7 @@ const userApiSlice=apiSlice.injectEndpoints({
           body: {email},
         }),
       }),
-        deleteUser:build.mutation({
+      deleteUser:build.mutation({
             query:(user)=>({
                 url:`/api/user`,
                 method:'DELETE',
@@ -45,7 +45,7 @@ const userApiSlice=apiSlice.injectEndpoints({
         }),
         invalidatesTags:["Users"]
         }),
-        editUser:build.mutation({
+      editUser:build.mutation({
             query:(user)=>({
                 url:`api/user`,
                 method:"PUT",
