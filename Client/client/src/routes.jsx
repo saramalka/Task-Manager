@@ -8,6 +8,7 @@ import Profile from "./Components/profile";
 import TaskList from "./Components/taskList";
 import TeamsList from './Components/teamsList'
 import Homepage from "./Components/homepage";
+import UserList from "./Components/userList";
 
 
 
@@ -28,7 +29,7 @@ const AppRoutes = () => {
       <Route path="/" element={<Homepage />} />
       <Route path="/teams" element={<TeamsList />} />
       <Route path="/tasks" element={<TaskList />} />
-      {/* <Route path="tasks/:taskId" element={<TaskDetails />} /> */}
+      <Route path="/users" element={<UserList />} />
       <Route path="profile" element={<Profile />} />
   
     </Routes>

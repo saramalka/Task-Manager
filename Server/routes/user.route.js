@@ -6,7 +6,7 @@ const {isAdmin}=require("../middleware/role.middleware")
 
 router.use(express.json())
 
-router.get("/",userController.getAllUsers)
+router.get("/",userController.getAllUsersAndTeams)
 router.post('/login', userController.login);
 router.post('/check-email',userController.checkEmail)
 router.get('/me', verifyToken, userController.getMe);

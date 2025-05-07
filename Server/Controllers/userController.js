@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User=require("../Models/user.model")
+const Team=require("../Models/team.model")
 const mongoose=require("mongoose")
 
 const register=async(req,res)=>{
@@ -40,13 +41,17 @@ const register=async(req,res)=>{
 
 
 
-const getAllUsers= async (req, res) => {
+const getAllUsersAndTeams= async (req, res) => {
     try{
-      const users = await User.find().select('-password').lean();
+      const users = await User.find().select('-password').lean().populate('teams')
+      const teams=await Team.find();
     if (!users?.length) {
          return res.status(400).json({ message: 'No users found' })
     }
-    res.json(users)
+    if (!teams?.length) {
+      return res.status(400).json({ message: 'No teams found' })
+ }
+    res.json({users,teams})
 }catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -54,7 +59,7 @@ const getAllUsers= async (req, res) => {
 
 const apdateUser=async(req,res)=>{
     const{name,_id,password,email,teams,role}=req.body
-    if (!name || !password || !_id || !email)
+    if (!name  || !_id || !email)
        return res.status(400).json('name, id and username are required fields')
     const idObjectId = new mongoose.Types.ObjectId(_id);
     const user= await User.findById(idObjectId).exec()
@@ -147,4 +152,4 @@ const checkEmail=async(req, res) => {
         if (!req.userId) return res.status(401).json({ message: 'Unauthorized' });
         res.json(user);
       };
-module.exports={getAllUsers,apdateUser,deleteUser,getUserByID,login,getMe,register,checkEmail}
+module.exports={getAllUsersAndTeams,apdateUser,deleteUser,getUserByID,login,getMe,register,checkEmail}

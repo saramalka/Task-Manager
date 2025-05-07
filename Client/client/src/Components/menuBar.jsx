@@ -40,10 +40,10 @@ export default function Menu() {
             label: 'My Teams',
             command: () => navigate('/teams'),
         },
-        // {
-        //     label: 'Task Details',
-        //     command: () => navigate('/api/tasks/456'),
-        // },
+        {
+            label: 'Users',
+            command: () => navigate('/users'),
+        },
     ];
 
     

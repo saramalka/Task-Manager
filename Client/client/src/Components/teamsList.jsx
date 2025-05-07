@@ -15,11 +15,14 @@ import {  useDeleteTeamMutation, useGetTeamsQuery ,useEditTeamMutation,useAddTea
 import getUserIdFromToken from '../getToken'
 import { Dialog } from 'primereact/dialog';
 import TeamDetails from './teamDetails';
+import UserList from './userList';
 
 export default function TeamsList() {
     const [teams, setTeams] = useState([]);
     const {data,isError,isLoading,isSuccess,error}=useGetTeamsQuery()
     const [selectedTeams, setSelectedTeams] = useState([]);
+    const [showUserListDialog, setShowUserListDialog] = useState(false);
+    const [currentMembers, setCurrentMembers] = useState([]);
     const [deleteTeamDialog, setDeleteTeamDialog] = useState(false);
     const [deleteTeamsDialog, setDeleteTeamsDialog] = useState(false);
     const [editTeamById] = useEditTeamMutation();
@@ -258,6 +261,24 @@ const saveTeam = async () => {
         }));
     }
  }
+
+ const openUserList = (members) => {
+    setCurrentMembers(members);
+    setShowUserListDialog(true);
+};
+
+
+ const membersButtonTemplate = (rowData) => {
+    return (
+        <Button
+            icon="pi pi-users"
+            label="View"
+            className="p-button-sm p-button-info"
+            onClick={() => openUserList(rowData.members || [])}
+        />
+    );
+};
+
     
 
  const deleteTeamDialogFooter = (
@@ -285,7 +306,8 @@ const saveTeam = async () => {
                 {/* <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column> */}
                 <Column field="name" header="Name" sortable filter filterPlaceholder="Search by name" style={{ minWidth: '14rem' }} />
                 
-                <Column field="members" header="members" sortable filterField="team?.name" style={{ minWidth: '14rem' }} body={membersBodyTemplate}  />
+                <Column header="Members" body={membersButtonTemplate} style={{ minWidth: '10rem', textAlign: 'center' }}/>
+
                 <Column field="createdBy.name" header="Admin"  sortable filter filterPlaceholder="Search by admin" style={{ minWidth: '14rem' }}/>
                 {/* <Column field="activity" header="Activity" sortable showFilterMatchModes={false} style={{ minWidth: '12rem' }} body={activityBodyTemplate} filter filterElement={activityFilterTemplate} /> */}
                 <Column headerStyle={{ width: '5rem', textAlign: 'center' }} bodyStyle={{ textAlign: 'center', overflow: 'visible' }} body={actionBodyTemplate} />
@@ -313,6 +335,17 @@ const saveTeam = async () => {
         }>
          <p>Are you sure you want to delete this team?</p>
         </Dialog>
+
+        <Dialog
+    visible={showUserListDialog}
+    onHide={() => setShowUserListDialog(false)}
+    header="Task Members"
+    style={{ width: '40vw' }}
+>
+    <UserList usersOfTeam={currentMembers} onClose={() => setShowUserListDialog(false)} />
+</Dialog>
+
+{/* <UserList users={members} onClose={handleCloseUserList} /> */}
 
         <Dialog visible={deleteTeamsDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteTeamsDialogFooter} onHide={hideDeleteTeamsDialog}>
             <div className="confirmation-content">
