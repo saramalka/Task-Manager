@@ -10,7 +10,7 @@ router.use(express.json())
 
 router.get("/",verifyToken,taskController.getTaskAndUsersByTeam)
 router.get("./taskId",taskController.getTaskById)
-router.post("/", taskController.createTask)
+router.post("/",verifyToken ,taskController.createTask)
 router.put("/:id",taskController.editTask)
 router.put("/:id",verifyToken,taskController.updateTaskStatus)
 router.delete("/:id",taskController.deleteTask)

@@ -4,7 +4,10 @@ const Team=require("../Models/team.model")
 const User=require("../Models/user.model")
 
 const createTask=async(req,res)=>{
-    const { title, teamId,status,priority,assignedTo,createdBy,comments } = req.body;
+    const { title, status,priority,assignedTo,createdBy,comments } = req.body;
+    const teamId=req.user.teamId
+    console.log(req.user);
+    
     try{
         if(!title|!teamId)
             return res.status(404).send('title, teamId are required')

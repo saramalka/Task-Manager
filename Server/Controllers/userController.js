@@ -13,7 +13,11 @@ const register=async(req,res)=>{
     }
     const passwordHash = await bcrypt.hash(password, 10);
     const user=await User.create({name,password:passwordHash,email,role,teams})
-    const token = jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET);
+    const token = jwt.sign(
+      { id: user._id.toString(), teamId: user.teams[0] },
+      process.env.JWT_SECRET
+    );
+    
 
     if (user) { 
       return res.status(200).json({
@@ -101,7 +105,7 @@ const getUserByID = async (req, res) => {
 
 const login = async (req, res) => {
             try {
-              const { email, password,teams} = req.body;
+              const { email, password} = req.body;
               const user = await User.findOne({ email });
               if (!user) {
                 return res.status(401).json({ message: 'User not found' });
@@ -113,8 +117,11 @@ const login = async (req, res) => {
               }
           
 
-              const token = jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET);
-
+              const token = jwt.sign(
+                { id: user._id.toString(), teamId: user.teams[0] },
+                process.env.JWT_SECRET
+              );
+              
               res.status(200).json({ user, token });
           
             } catch (err) {
